@@ -16,7 +16,33 @@ class AdminController extends ResourceController
 
     public function index()
     {
-        return $this->respond($this->adminModel->findAll());
+        $perPage = $this->request->getGet('per_page') ?? 10;
+        $page = $this->request->getGet('page') ?? 1;
+        $search = $this->request->getGet('search');
+
+        $query = $this->adminModel;
+
+        if ($search) {
+            $query = $query->like('nama_admin', $search)
+                           ->orLike('email_admin', $search);
+        }
+
+        $admins = $query->paginate($perPage, 'default', $page);
+        $pager = $this->adminModel->pager;
+
+        return $this->respond([
+            'status' => 200,
+            'message' => 'Admins retrieved successfully',
+            'data' => $admins,
+            'pagination' => [
+                'current_page' => $pager->getCurrentPage(),
+                'per_page' => $pager->getPerPage(),
+                'total_pages' => $pager->getPageCount(),
+                'total_admins' => $pager->getTotal(),
+                'next_page' => $pager->getNextPageURI(),
+                'prev_page' => $pager->getPreviousPageURI()
+            ]
+        ]);
     }
 
     public function show($id = null)
@@ -67,18 +93,60 @@ class AdminController extends ResourceController
 
     public function update($id = null)
     {
-        $data = $this->request->getRawInput();
-
-        // Hash new password if provided
-        if (!empty($data['password'])) {
-            $data['password'] = $this->hash_password($data['password']);
+        // Check if admin exists
+        $admin = $this->adminModel->find($id);
+        if (!$admin) {
+            return $this->failNotFound('Admin not found');
         }
-
-        if (!$this->adminModel->update($id, $data)) {
+    
+        // Get raw input data and ensure it's properly decoded
+        $json = $this->request->getBody();
+        try {
+            $data = json_decode($json, true);
+            
+            // If json_decode failed or returned null
+            if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
+                log_message('error', 'JSON decode error: ' . json_last_error_msg());
+                return $this->fail('Invalid JSON data');
+            }
+            
+            log_message('debug', 'Decoded update data: ' . print_r($data, true));
+        } catch (\Exception $e) {
+            log_message('error', 'JSON parsing error: ' . $e->getMessage());
+            return $this->fail('Failed to parse input data');
+        }
+    
+        
+        $rules = [
+            'nama_admin' => 'required|min_length[3]',
+            'email_admin' => "required|valid_email|is_unique[admin.email_admin,id_admin,$id]"
+        ];
+    
+        if (!$this->validate($rules)) {
+            return $this->fail($this->validator->getErrors());
+        }
+    
+        // Only hash password if it's provided
+        if (isset($data['password']) && !empty($data['password'])) {
+            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        } else {
+            unset($data['password']);
+        }
+    
+        try {
+            $updated = $this->adminModel->update($id, $data);
+            if ($updated) {
+                return $this->respond([
+                    'status' => 200,
+                    'message' => 'Admin updated successfully',
+                    'data' => $this->adminModel->find($id)
+                ]);
+            }
             return $this->fail($this->adminModel->errors());
+        } catch (\Exception $e) {
+            log_message('error', 'Update error: ' . $e->getMessage());
+            return $this->fail('Failed to update admin: ' . $e->getMessage());
         }
-
-        return $this->respond(['message' => 'Admin updated successfully']);
     }
 
     public function delete($id = null)
