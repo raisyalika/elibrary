@@ -29,9 +29,16 @@ class MemberModel extends Model
     
     protected function hashPassword(array $data)
     {
-        if (!isset($data['data']['password'])) return $data;
-        
-        $data['data']['password'] = password_hash($data['data']['password'], PASSWORD_DEFAULT);
+        if (!isset($data['data']['password'])) {
+            return $data;
+        }
+    
+        // Check if the password is already hashed (avoid double hashing)
+        if (!password_get_info($data['data']['password'])['algo']) { 
+            $data['data']['password'] = password_hash($data['data']['password'], PASSWORD_BCRYPT);
+        }
+    
         return $data;
     }
+    
 }
