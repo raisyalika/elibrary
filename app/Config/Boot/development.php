@@ -1,5 +1,14 @@
 <?php
 
+require_once ROOTPATH . 'vendor/autoload.php';
+
+use Dotenv\Dotenv;
+
+if (file_exists(ROOTPATH . '.env')) {
+    $dotenv = Dotenv::createImmutable(ROOTPATH);
+    $dotenv->load();
+}
+
 /*
  |--------------------------------------------------------------------------
  | ERROR DISPLAY
@@ -32,3 +41,6 @@ defined('SHOW_DEBUG_BACKTRACE') || define('SHOW_DEBUG_BACKTRACE', true);
  | items. It can always be used within your own application too.
  */
 defined('CI_DEBUG') || define('CI_DEBUG', true);
+$dotenv = \Dotenv\Dotenv::createImmutable(ROOTPATH);
+$dotenv->load();
+
