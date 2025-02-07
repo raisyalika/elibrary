@@ -5,9 +5,21 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-$routes->get('/', 'Home::index');
-$routes->get('about', 'Page::about');
+// $routes->get('/', 'Home::index');
+$routes->get('/', 'Page::about');
 $routes->get('contact', 'Page::contact');
+$routes->get('login', 'page::login');
+$routes->get('register', 'page::register');
+$routes->get('dashboard_user', "page::dashboard_user");
+$routes->get('ebook', 'page::ebook');
+$routes->get('profile', 'page::profile');
+$routes->get('beranda', 'page::beranda');
+$routes->get('anggota','page::data_anggota');
+$routes->get('buku', 'page::data_buku');
+$routes->get('buku/tambah_buku', 'page::tambah_buku');
+$routes->get('buku/edit_buku', 'page::edit_buku');
+$routes->get('anggota/tambah_anggota', "page::tambah_anggota");
+$routes->get('anggota/edit_anggota', "page::edit_anggota");
 
 // API
 $routes->get('/api','ApiController::index');
