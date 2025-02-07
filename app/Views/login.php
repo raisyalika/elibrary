@@ -39,7 +39,6 @@
 
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-
       const requestBody = {
         username_or_email: email,
         password: password,
@@ -57,7 +56,7 @@
           localStorage.setItem("token", data.token);
           localStorage.setItem("user", JSON.stringify(data.user));
           alert("Login berhasil!");
-          window.location.href = "<?= base_url('dashboard_user') ?>";
+          window.location.href = "<?= base_url('/beranda') ?>";
         } else {
           alert("Login gagal: " + (data.message || "Email atau password salah!"));
         }
