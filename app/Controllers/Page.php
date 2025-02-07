@@ -20,6 +20,11 @@ class page extends BaseController
     return view('login');
   }
 
+  public function login_user()
+  {
+    return view('login_user');
+  }
+
   // Register
   public function register()
   {
