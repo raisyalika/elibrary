@@ -10,7 +10,7 @@ class BookModel extends Model
     protected $primaryKey = 'id_buku';
     protected $allowedFields = [
         'judul', 'isbn', 'pengarang', 'penerbit', 'tahun',
-        'kategori', 'tgl_pengadaan', 'ebook', 'buku_fisik',
+        'kategori', 'level','tgl_pengadaan', 'ebook', 'buku_fisik',
         'file_ebook', 'sampul', 'sinopsis'
     ];
     
