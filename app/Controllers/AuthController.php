@@ -18,13 +18,12 @@ class AuthController extends ResourceController
     $password = $this->request->getVar('password');
     $userType = $this->request->getVar('user_type'); // 'admin' or 'member'
 
-    // Check if JWT_SECRET is set
+    
     $key = getenv('JWT_SECRET');
     if (!$key) {
         return $this->fail('JWT Secret not set');
     }
 
-    // Handle login based on user type
     if ($userType === 'admin') {
         $model = new \App\Models\AdminModel();
         $user = $model->where('email_admin', $usernameOrEmail)->first();
