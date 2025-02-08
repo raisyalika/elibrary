@@ -14,6 +14,56 @@ class MemberController extends ResourceController
         $this->memberModel = new MemberModel();
     }
 
+    public function uploadProfilePicture($id)
+    {
+        // Get the uploaded file
+        $file = $this->request->getFile('profilePicture');
+    
+        // If no file is received or invalid file, return an error
+        if (!$file || !$file->isValid()) {
+            return $this->fail('No file uploaded or file is invalid.');
+        }
+    
+        // Check if the file has already been moved (prevents duplicate moves)
+        if ($file->hasMoved()) {
+            return $this->fail('File already moved.');
+        }
+    
+        // Generate a random file name
+        $newName = $file->getRandomName();
+        
+        // Move file to uploads folder
+        if (!$file->move(ROOTPATH . 'public/uploads/profile_pictures/', $newName)) {
+            return $this->fail('Failed to move uploaded file.');
+        }
+    
+        // Generate the URL for the uploaded profile picture
+        $fileUrl = base_url("uploads/profile_pictures/{$newName}");
+    
+        // Ensure the user exists before updating
+        $member = $this->memberModel->find($id);
+        if (!$member) {
+            return $this->failNotFound('Member not found.');
+        }
+    
+        // Update the database with the new file URL
+        $updated = $this->memberModel->update($id, ['foto_url' => $fileUrl]);
+    
+        if (!$updated) {
+            return $this->fail('Failed to update profile picture in database.');
+        }
+    
+        // Return a success response
+        return $this->respond([
+            'status' => 200,
+            'message' => 'Profile picture uploaded successfully',
+            'foto_url' => $fileUrl
+        ]);
+    }
+    
+
+
+
     // Fetch all members
     public function index()
     {
