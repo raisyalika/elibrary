@@ -80,6 +80,14 @@
 </body>
 
 <script>
+    const toBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+    });
+};
     document.addEventListener("DOMContentLoaded", function() {
         let userData = localStorage.getItem("user");
         if (userData) {
@@ -88,54 +96,66 @@
         }
     });
 
-    document.getElementById("bookForm").addEventListener("submit", async function(event) {
-        event.preventDefault();
-        
-        const token = localStorage.getItem("token");
-        if (!token) {
-            alert("Token tidak ditemukan, silakan login terlebih dahulu.");
-            return;
+   document.getElementById("bookForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+        alert("Token tidak ditemukan, silakan login terlebih dahulu.");
+        return;
+    }
+
+    // Ambil nilai dari input form
+   const bookData = {
+        judul: document.getElementById("judul").value.trim(),
+        isbn: document.getElementById("isbn").value.trim(),
+        pengarang: document.getElementById("pengarang").value.trim(),
+        penerbit: document.getElementById("penerbit").value.trim(),
+        tahun: document.getElementById("tahun").value.trim(),
+        tanggal_pengadaan: document.getElementById("tanggal_pengadaan").value.trim(),
+        kategori: document.getElementById("kategori").value.trim(),
+        sinopsis: document.getElementById("sinopsis").value.trim(),
+        format: [] // Format buku (E-Book / Buku Fisik)
+    };
+
+    // Tambahkan format buku berdasarkan checkbox yang dicentang
+    if (document.getElementById("formatEbook").checked) bookData.format.push("E-Book");
+    if (document.getElementById("formatFisik").checked) bookData.format.push("Buku Fisik");
+
+    // Ambil file sampul & ebook (konversi ke Base64 agar bisa dikirim via JSON)
+    const sampulFile = document.getElementById("sampul").files[0];
+    const ebookFile = document.getElementById("ebook").files[0];
+
+    if (sampulFile) {
+        bookData.sampul = await toBase64(sampulFile);
+    }
+    if (ebookFile) {
+        bookData.ebook = await toBase64(ebookFile);
+    }
+
+    try {
+        const response = await fetch("http://localhost:8080/api/books", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(bookData)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            alert("Buku berhasil ditambahkan!");
+            document.getElementById("bookForm").reset();
+        } else {
+            alert("Gagal menambahkan buku: " + JSON.stringify(result));
         }
-        
-        let formData = new FormData();
-        formData.append("judul", document.getElementById("judul").value);
-        formData.append("isbn", document.getElementById("isbn").value);
-        formData.append("pengarang", document.getElementById("pengarang").value);
-        formData.append("penerbit", document.getElementById("penerbit").value);
-        formData.append("tahun", document.getElementById("tahun").value);
-        formData.append("tanggal_pengadaan", document.getElementById("tanggal_pengadaan").value);
-        formData.append("kategori", document.getElementById("kategori").value);
-        formData.append("sinopsis", document.getElementById("sinopsis").value);
-        
-        let format = [];
-        if (document.getElementById("formatEbook").checked) format.push("E-Book");
-        if (document.getElementById("formatFisik").checked) format.push("Buku Fisik");
-        formData.append("format", format.join(", "));
-        
-        let sampulFile = document.getElementById("sampul").files[0];
-        let ebookFile = document.getElementById("ebook").files[0];
-        if (sampulFile) formData.append("sampul", sampulFile);
-        if (ebookFile) formData.append("ebook", ebookFile);
-        
-        try {
-            const response = await fetch("http://localhost:8080/api/books", {
-                method: "POST",
-                headers: { "Authorization": `Bearer ${token}` },
-                body: formData
-            });
-            
-            const result = await response.json();
-            if (response.ok) {
-                alert("Buku berhasil ditambahkan!");
-                document.getElementById("bookForm").reset();
-            } else {
-                alert("Gagal menambahkan buku: " + result.message);
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            alert("Terjadi kesalahan saat mengirim data.");
-        }
-    });
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Terjadi kesalahan saat mengirim data.");
+    }
+});
+
 </script>
 
 <?= $this->endSection() ?>
