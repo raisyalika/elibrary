@@ -54,15 +54,39 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Kategori*</label>
                         <div class="space-y-2">
                             <label class="inline-flex items-center">
-                                <input type="radio" name="category" value="Kelas 1" class="text-red-500 focus:ring-red-500">
-                                <span class="ml-2">Kelas 1</span>
+                                <input type="radio" name="category" value="non_fiksi" class="text-red-500 focus:ring-red-500">
+                                <span class="ml-2">Non Fiksi</span>
                             </label>
                             <label class="inline-flex items-center ml-6">
-                                <input type="radio" name="category" value="Kelas 2" class="text-red-500 focus:ring-red-500">
-                                <span class="ml-2">Kelas 2</span>
+                                <input type="radio" name="category" value="dongeng" class="text-red-500 focus:ring-red-500">
+                                <span class="ml-2">Dongeng</span>
+                            </label>
+                            <label class="inline-flex items-center ml-6">
+                                <input type="radio" name="category" value="sains" class="text-red-500 focus:ring-red-500">
+                                <span class="ml-2">Sains</span>
+                            </label>
+                            <label class="inline-flex items-center ml-6">
+                                <input type="radio" name="category" value="komik" class="text-red-500 focus:ring-red-500">
+                                <span class="ml-2">Komik</span>
+                            </label>
+                            <label class="inline-flex items-center ml-6">
+                                <input type="radio" name="category" value="novel" class="text-red-500 focus:ring-red-500">
+                                <span class="ml-2">Novel</span>
                             </label>
                         </div>
                     </div>
+                    <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Level*</label>
+                    <select id="level" class="w-full p-2 border rounded-md">
+                        <option value="Kelas 1">Kelas 1</option>
+                        <option value="Kelas 2">Kelas 2</option>
+                        <option value="Kelas 3">Kelas 3</option>
+                        <option value="Kelas 4">Kelas 4</option>
+                        <option value="Kelas 6">Kelas 6</option>
+                        <option value="Kelas 5">Kelas 5</option>
+                        <option value="Guru">Guru</option>
+                    </select>
+                </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Sinopsis</label>
@@ -139,7 +163,9 @@ async function fetchBook(bookId, token) {
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
         const result = await response.json();
+        console.log(result)
         populateForm(result);
+
     } catch (error) {
         console.error("Error fetching book data:", error);
     }
@@ -149,20 +175,21 @@ function populateForm(data) {
     document.getElementById('judul').value = data.judul || "";
     document.getElementById('isbn').value = data.isbn || "";
     document.getElementById('pengarang').value = data.pengarang || "";
+    document.getElementById('level').value = data.level || "";
     document.getElementById('penerbit').value = data.penerbit || "";
     document.getElementById('tahun_terbit').value = data.tahun_terbit || "";
     document.getElementById('tanggal_pengadaan').value = data.tanggal_pengadaan || "";
     document.getElementById('sinopsis').value = data.sinopsis || "";
-
+    console.log(data)
     const kategori = document.querySelector(`input[name="category"][value="${data.kategori}"]`);
     if (kategori) kategori.checked = true;
 
-    if (data.format) {
-        data.format.split(",").forEach(format => {
-            const checkbox = document.querySelector(`input[type="checkbox"][value="${format.trim()}"]`);
-            if (checkbox) checkbox.checked = true;
-        });
-    }
+    // if (data.format) {
+    //     data.format.split(",").forEach(format => {
+    //         const checkbox = document.querySelector(`input[type="checkbox"][value="${format.trim()}"]`);
+    //         if (checkbox) checkbox.checked = true;
+    //     });
+    // }
 }
 
 async function updateBook(event, bookId, token) {
@@ -203,7 +230,7 @@ async function updateBook(event, bookId, token) {
         if (response.ok){
             alert("Buku berhasil diUpdate!");
             document.getElementById('bookForm').reset();
-            window.location.href = "<?= base_url('/buku') ?>";
+            window.location.href = "<?= base_url('/beranda') ?>";
 
         } else{
             alert("Gagal menyimpan buku. Error: " + result.message);
