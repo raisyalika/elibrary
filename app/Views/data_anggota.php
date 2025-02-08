@@ -37,6 +37,18 @@
                 </thead>
                 <tbody id="memberTableBody"></tbody>
             </table>
+
+
+        </div>
+          <!-- Pagination -->
+          <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+            <div class="text-sm text-gray-700">
+                Showing <span id="startRange">1</span> to <span id="endRange">10</span> of <span id="totalEntries">100</span> Entries
+            </div>
+            <div class="flex space-x-2">
+                <button class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600" id="prevBtn">Prev</button>
+                <button class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600" id="nextBtn">Next</button>
+            </div>
         </div>
     </div>
 
@@ -53,81 +65,131 @@
     </div>
 
     <script>
-    document.addEventListener("DOMContentLoaded", async function () {
-        let userData = localStorage.getItem("user");
-        let token = localStorage.getItem("token");
-        if (userData) document.getElementById("userName").textContent = JSON.parse(userData).name;
-        if (token) await fetchAnggota(token);
-    });
+  document.addEventListener("DOMContentLoaded", async function () {
+    let userData = localStorage.getItem("user");
+    let token = localStorage.getItem("token");
+    if (userData) document.getElementById("userName").textContent = JSON.parse(userData).name;
+    if (token) await fetchAnggota(token, 1);
 
-    let anggotaIdDelete = null;
-    
-    async function fetchAnggota(token) {
-        try {
-            const response = await fetch("http://localhost:8080/api/members", {
-                method: "GET",
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
-            });
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const result = await response.json();
-            renderTable(result.data);
-        } catch (error) {
-            console.error("Gagal mengambil data anggota:", error);
-        }
-    }
+    document.getElementById("searchInput").addEventListener("input", () => fetchAnggota(token, 1));
+    document.getElementById("prevBtn").addEventListener("click", () => changePage(-1));
+    document.getElementById("nextBtn").addEventListener("click", () => changePage(1));
+});
 
-    function renderTable(data) {
-        const tableBody = document.getElementById('memberTableBody');
-        tableBody.innerHTML = '';
-        data.forEach((member, index) => {
-            const row = document.createElement('tr');
-            row.className = 'hover:bg-gray-50';
-            row.innerHTML = `
-                <td class="px-6 py-4 text-sm text-gray-900">${index+1}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${member.id_anggota}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${member.username}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${member.jk_anggota}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${member.level_anggota}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${member.alamat_anggota}</td>
-                <td class="px-6 py-4 space-x-2 flex">
-                    <a href='anggota/edit_anggota?id=${member.id_anggota}' class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs">Edit</a>
-                    <button onclick="openDeleteModal(${member.id_anggota})" class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs">Hapus</button>
-                </td>
-            `;
-            tableBody.appendChild(row);
+let currentPage = 1;
+let totalEntries = 0;
+let perPage = 10;
+
+async function fetchAnggota(token, page = 1) {
+    const searchQuery = document.getElementById("searchInput").value.trim();
+    let queryParams = [`page=${page}`, `per_page=${perPage}`];
+    if (searchQuery) queryParams.push(`search=${encodeURIComponent(searchQuery)}`);
+
+    try {
+        const response = await fetch(`http://localhost:8080/api/members?${queryParams.join("&")}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
         });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        totalEntries = result.pagination.total_members;
+        currentPage = result.pagination.current_page;
+        renderTable(result.data);
+        updatePagination();
+    } catch (error) {
+        console.error("Error fetching members:", error);
+    }
+}
+
+function renderTable(data) {
+    const tableBody = document.getElementById("memberTableBody");
+    tableBody.innerHTML = "";
+
+    if (data.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="7" class="text-center py-4">📭 Tidak ada hasil ditemukan.</td></tr>`;
+        return;
     }
 
-    function openDeleteModal(memberId) {
-        anggotaIdDelete = memberId;
-        document.getElementById("deleteModal").classList.remove("hidden");
-    }
+    data.forEach((member, index) => {
+        const row = document.createElement("tr");
+        row.className = "hover:bg-gray-50";
+        row.innerHTML = `
+            <td class="px-6 py-4 text-sm text-gray-900">${(currentPage - 1) * perPage + index + 1}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${member.id_anggota}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${member.username}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${member.jk_anggota}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${member.level_anggota}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${member.alamat_anggota}</td>
+            <td class="px-6 py-4 space-x-2 flex">
+                <a href='anggota/edit_anggota?id=${member.id_anggota}' class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs">Edit</a>
+                <button onclick="openDeleteModal(${member.id_anggota})" class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs">Hapus</button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
 
-    document.getElementById("cancelDelete").addEventListener("click", function () {
+function updatePagination() {
+    document.getElementById("startRange").textContent = (currentPage - 1) * perPage + 1;
+    document.getElementById("endRange").textContent = Math.min(currentPage * perPage, totalEntries);
+    document.getElementById("totalEntries").textContent = totalEntries;
+
+    document.getElementById("prevBtn").disabled = currentPage === 1;
+    document.getElementById("nextBtn").disabled = currentPage * perPage >= totalEntries;
+}
+
+function changePage(step) {
+    let token = localStorage.getItem("token");
+    if (token) {
+        fetchAnggota(token, currentPage + step);
+    }
+}
+
+function openDeleteModal(memberId) {
+    anggotaIdDelete = memberId;
+    document.getElementById("deleteModal").classList.remove("hidden");
+}
+
+document.getElementById("cancelDelete").addEventListener("click", function () {
+    document.getElementById("deleteModal").classList.add("hidden");
+    anggotaIdDelete = null;
+});
+
+document.getElementById("confirmDelete").addEventListener("click", async function () {
+    if (anggotaIdDelete !== null) {
+        await deleteAnggota(anggotaIdDelete);
         document.getElementById("deleteModal").classList.add("hidden");
         anggotaIdDelete = null;
-    });
-
-    document.getElementById("confirmDelete").addEventListener("click", async function () {
-        if (anggotaIdDelete !== null) {
-            await deleteAnggota(anggotaIdDelete);
-            document.getElementById("deleteModal").classList.add("hidden");
-            anggotaIdDelete = null;
-        }
-    });
-
-    async function deleteAnggota(anggotaId) {
-        let token = localStorage.getItem("token");
-        try {
-            await fetch(`http://localhost:8080/api/members/${anggotaId}`, {
-                method: "DELETE",
-                headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
-            });
-            await fetchAnggota(token);
-        } catch (error) {
-            console.error("Gagal menghapus anggota:", error);
-        }
     }
+});
+
+async function deleteAnggota(anggotaId) {
+    let token = localStorage.getItem("token");
+    try {
+        const response = await fetch(`http://localhost:8080/api/members/${anggotaId}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error("Gagal menghapus anggota");
+        }
+
+        fetchAnggota(token, 1);
+    } catch (error) {
+        console.error("Error deleting member:", error);
+    }
+}
     </script>
 </body>
 <?php echo $this->endSection(); ?>

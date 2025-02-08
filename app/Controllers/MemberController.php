@@ -108,7 +108,6 @@ class MemberController extends ResourceController
             ]
         ]);
     }
-    // Create a new member
     public function create()
     {
         $rules = [
@@ -119,11 +118,11 @@ class MemberController extends ResourceController
             'level_anggota' => 'required|in_list[Kelas 1,Kelas 2,Kelas 3,Kelas 4,Kelas 5,Kelas 6,Guru]',
             'alamat_anggota' => 'required'
         ];
-
+    
         if (!$this->validate($rules)) {
             return $this->fail($this->validator->getErrors());
         }
-
+    
         $data = [
             'nama_anggota' => $this->request->getVar('nama_anggota'),
             'username' => $this->request->getVar('username'),
@@ -131,20 +130,31 @@ class MemberController extends ResourceController
             'jk_anggota' => $this->request->getVar('jk_anggota'),
             'level_anggota' => $this->request->getVar('level_anggota'),
             'alamat_anggota' => $this->request->getVar('alamat_anggota'),
-            'foto_url' => null // No image storage, so it's set to null
+            'foto_url' => null // No image storage initially
         ];
-
+    
         $id = $this->memberModel->insert($data);
-
         if (!$id) {
             return $this->fail($this->memberModel->errors());
         }
-
+    
+        // Retrieve the newly created record
+        $newMember = $this->memberModel->find($id);
+    
         return $this->respondCreated([
             'message' => 'Member created successfully',
-            'data' => $data
+            'data' => [
+                'id_anggota' => $id,  // Include the generated ID
+                'nama_anggota' => $newMember['nama_anggota'],
+                'username' => $newMember['username'],
+                'jk_anggota' => $newMember['jk_anggota'],
+                'level_anggota' => $newMember['level_anggota'],
+                'alamat_anggota' => $newMember['alamat_anggota'],
+                'foto_url' => $newMember['foto_url']
+            ]
         ]);
     }
+    
 
     // Get member by ID
     public function show($id = null)

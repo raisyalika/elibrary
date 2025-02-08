@@ -72,7 +72,6 @@
 </div>
 
 
-
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     let userData = localStorage.getItem("user"); 
@@ -80,24 +79,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (userData) {
         let user = JSON.parse(userData);
-        let nameElement = document.getElementById("userName");
-        nameElement.textContent = user.name;
-    } else {
-        console.warn("User data tidak ditemukan di localStorage.");
+        document.getElementById("userName").textContent = user.name;
     }
 
     if (token) {
-        fetchBooks(token);
-    } else {
-        console.warn("Token tidak ditemukan di localStorage.");
+        fetchBooks(token, 1);
     }
+
+    document.getElementById("searchInput").addEventListener("input", () => fetchBooks(token, 1));
+    document.getElementById("prevBtn").addEventListener("click", () => changePage(-1));
+    document.getElementById("nextBtn").addEventListener("click", () => changePage(1));
 });
 
-let bookIdToDelete = null;
+let currentPage = 1;
+let totalEntries = 0;
+let perPage = 10;
 
-async function fetchBooks(token) {
+async function fetchBooks(token, page = 1) {
+    const searchQuery = document.getElementById("searchInput").value.trim();
+    let queryParams = [`page=${page}`, `per_page=${perPage}`];
+    if (searchQuery) queryParams.push(`search=${encodeURIComponent(searchQuery)}`);
+
     try {
-        const response = await fetch("http://localhost:8080/api/books", {
+        const response = await fetch(`http://localhost:8080/api/books?${queryParams.join("&")}`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`,
@@ -110,30 +114,38 @@ async function fetchBooks(token) {
         }
 
         const result = await response.json();
+        totalEntries = result.pagination.total_books;
+        currentPage = result.pagination.current_page;
         renderTable(result.data);
+        updatePagination();
     } catch (error) {
         console.error("Error fetching books:", error);
     }
 }
 
 function renderTable(data) {
-    const tableBody = document.getElementById('bookTableBody');
-    tableBody.innerHTML = '';
+    const tableBody = document.getElementById("bookTableBody");
+    tableBody.innerHTML = "";
+
+    if (data.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="10" class="text-center py-4">📭 Tidak ada hasil ditemukan.</td></tr>`;
+        return;
+    }
 
     data.forEach((book, index) => {
-        const row = document.createElement('tr');
-        row.className = 'hover:bg-gray-50';
+        const row = document.createElement("tr");
+        row.className = "hover:bg-gray-50";
         row.innerHTML = `
-            <td class="px-6 py-4 text-sm text-gray-900">${index + 1}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${(currentPage - 1) * perPage + index + 1}</td>
             <td class="px-6 py-4 text-sm text-gray-900">${book.id_buku}</td>
             <td class="px-6 py-4">
                 <div class="w-12 h-12 bg-gray-200 rounded">
-                    <img src="${book.sampul}" alt="${book.judul}" class="w-full h-full object-cover rounded">
+                    <img src="${book.sampul_url || '/api/placeholder/120/120'}" alt="${book.judul}" class="w-full h-full object-cover rounded">
                 </div>
             </td>
             <td class="px-6 py-4 text-sm text-gray-900">${book.judul}</td>
             <td class="px-6 py-4 text-sm text-gray-900">${book.isbn}</td>
-            <td class="px-6 py-4 text-sm text-gray-900">${book.kategori}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${book.kategori || "Tidak Ada"}</td>
             <td class="px-6 py-4 text-sm text-gray-900">${book.pengarang}</td>
             <td class="px-6 py-4 text-sm text-gray-900">${book.penerbit}</td>
             <td class="px-6 py-4 text-sm text-gray-900">${book.tahun}</td>
@@ -146,19 +158,33 @@ function renderTable(data) {
     });
 }
 
-// Buka Modal Delete
+function updatePagination() {
+    document.getElementById("startRange").textContent = (currentPage - 1) * perPage + 1;
+    document.getElementById("endRange").textContent = Math.min(currentPage * perPage, totalEntries);
+    document.getElementById("totalEntries").textContent = totalEntries;
+
+    document.getElementById("prevBtn").disabled = currentPage === 1;
+    document.getElementById("nextBtn").disabled = currentPage * perPage >= totalEntries;
+}
+
+function changePage(step) {
+    let token = localStorage.getItem("token");
+    if (token) {
+        fetchBooks(token, currentPage + step);
+    }
+}
+
+// Modal Delete
 function openDeleteModal(bookId) {
     bookIdToDelete = bookId;
     document.getElementById("deleteModal").classList.remove("hidden");
 }
 
-// Tutup Modal
 document.getElementById("cancelDelete").addEventListener("click", function () {
     document.getElementById("deleteModal").classList.add("hidden");
     bookIdToDelete = null;
 });
 
-// Konfirmasi Hapus
 document.getElementById("confirmDelete").addEventListener("click", async function () {
     if (bookIdToDelete !== null) {
         await deleteBook(bookIdToDelete);
@@ -167,7 +193,6 @@ document.getElementById("confirmDelete").addEventListener("click", async functio
     }
 });
 
-// Hapus Buku dari Database
 async function deleteBook(bookId) {
     let token = localStorage.getItem("token");
     try {
@@ -183,12 +208,12 @@ async function deleteBook(bookId) {
             throw new Error(`Gagal menghapus buku: ${response.statusText}`);
         }
 
-        // Refresh tabel setelah penghapusan
-        fetchBooks(token);
+        fetchBooks(token, 1);
     } catch (error) {
         console.error("Error deleting book:", error);
     }
 }
 </script>
+
 
 <?= $this->endSection() ?>

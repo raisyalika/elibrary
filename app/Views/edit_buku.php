@@ -15,9 +15,12 @@
             <!-- Form Content -->
             <div class="bg-white rounded-lg shadow-md p-6 max-w-4xl mx-auto">
                 <form class="space-y-6" id="bookForm">
-                    <div>
+                <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Sampul Buku*</label>
-                        <input type="file" id="sampul" class="w-full p-2 border rounded-md text-gray-700">
+                        <div class="mb-2">
+                            <img id="coverPreview" src="/api/placeholder/120/120" alt="Cover Preview" class="w-32 h-32 object-cover rounded-md">
+                        </div>
+                        <input type="file" id="sampul" name="cover" accept="image/*" class="w-full p-2 border rounded-md text-gray-700">
                     </div>
 
                     <div>
@@ -106,10 +109,10 @@
                             </label>
                         </div>
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Upload E-Book</label>
-                        <input type="file" id="ebook" class="w-full p-2 border rounded-md text-gray-700">
+                        <div id="ebookPreview" class="mb-2"></div>
+                        <input type="file" id="ebook" name="pdf" accept=".pdf" class="w-full p-2 border rounded-md text-gray-700">
                         <p class="mt-1 text-sm text-gray-500">Format: .pdf</p>
                     </div>
 
@@ -125,13 +128,12 @@
     </div>
 </body>
 
-
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
     let userData = localStorage.getItem("user"); 
     let token = localStorage.getItem("token");
     const urlParams = new URLSearchParams(window.location.search);
-    const bookId = urlParams.get("id"); 
+    const bookId = urlParams.get("id");
 
     if (userData) {
         let user = JSON.parse(userData);
@@ -144,12 +146,10 @@
         console.warn("Token atau Book ID tidak ditemukan.");
     }
 
-    // Event listener untuk form submit
     document.getElementById("bookForm").addEventListener("submit", function (event) {
         updateBook(event, bookId, token);
     });
 });
-
 async function fetchBook(bookId, token) {
     try {
         const response = await fetch(`http://localhost:8080/api/books/${bookId}`, {
@@ -160,65 +160,91 @@ async function fetchBook(bookId, token) {
             }
         });
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
 
         const result = await response.json();
-        console.log(result)
+        console.log("📖 Book Data:", result);
+        
+        // Ensure the data is correctly passed to populateForm
         populateForm(result);
 
     } catch (error) {
-        console.error("Error fetching book data:", error);
+        console.error("🚨 Error fetching book data:", error);
+        alert("❌ Gagal mengambil data buku.");
     }
 }
 
 function populateForm(data) {
+    console.log("📖 Populating Form with Data:", data);
+
     document.getElementById('judul').value = data.judul || "";
     document.getElementById('isbn').value = data.isbn || "";
     document.getElementById('pengarang').value = data.pengarang || "";
     document.getElementById('level').value = data.level || "";
     document.getElementById('penerbit').value = data.penerbit || "";
-    document.getElementById('tahun_terbit').value = data.tahun_terbit || "";
-    document.getElementById('tanggal_pengadaan').value = data.tanggal_pengadaan || "";
+    document.getElementById('tahun').value = data.tahun && data.tahun !== "0000" ? data.tahun : ""; // Avoid "0000"
+    document.getElementById('tanggal_pengadaan').value = data.tgl_pengadaan || "";
     document.getElementById('sinopsis').value = data.sinopsis || "";
-    console.log(data)
-    const kategori = document.querySelector(`input[name="category"][value="${data.kategori}"]`);
-    if (kategori) kategori.checked = true;
 
-    // if (data.format) {
-    //     data.format.split(",").forEach(format => {
-    //         const checkbox = document.querySelector(`input[type="checkbox"][value="${format.trim()}"]`);
-    //         if (checkbox) checkbox.checked = true;
-    //     });
-    // }
+    // Handle kategori (category) selection
+    if (data.kategori && data.kategori.trim() !== "") {
+        const kategoriRadio = document.querySelector(`input[name="category"][value="${data.kategori}"]`);
+        if (kategoriRadio) kategoriRadio.checked = true;
+    }
+
+    // Handle Sampul (Cover Image)
+    const coverPreview = document.getElementById("coverPreview");
+    if (data.sampul_url) {
+        coverPreview.src = data.sampul_url;
+    } else {
+        coverPreview.src = "/api/placeholder/120/120"; // Default placeholder
+    }
+
+    // Handle E-Book Link
+    const ebookPreview = document.getElementById("ebookPreview");
+    ebookPreview.innerHTML = "";
+    if (data.file_ebook_url) {
+        const ebookLink = document.createElement("a");
+        ebookLink.href = data.file_ebook_url;
+        ebookLink.textContent = "📄 Lihat E-Book";
+        ebookLink.target = "_blank";
+        ebookLink.className = "text-blue-600 hover:text-blue-800 underline";
+        ebookPreview.appendChild(ebookLink);
+    }
+
+    // Handle format checkboxes
+    if (data.ebook === "T") {
+        document.querySelector(`input[type="checkbox"][value="E-Book"]`).checked = true;
+    }
+    if (data.buku_fisik === "T") {
+        document.querySelector(`input[type="checkbox"][value="Buku Fisik"]`).checked = true;
+    }
 }
 
+
+
 async function updateBook(event, bookId, token) {
-    event.preventDefault(); // Mencegah form submit default
-    
-    console.log("bookid",bookId)
-    console.log("token",token)
-
-     event.preventDefault(); // Mencegah reload halaman saat submit
-
-    const bookData = {
-        judul: document.getElementById("judul").value.trim(),
-        isbn: document.getElementById("isbn").value.trim(),
-        pengarang: document.getElementById("pengarang").value.trim(),
-        penerbit: document.getElementById("penerbit").value.trim(),
-        tahun: document.getElementById("tahun").value.trim(),
-        tanggal_pengadaan: document.getElementById("tanggal_pengadaan").value.trim(),
-        kategori: document.querySelector("input[name='category']:checked")?.value || "", // Mengambil kategori yang dipilih
-        sinopsis: document.getElementById("sinopsis").value.trim(),
-        format: Array.from(document.querySelectorAll("input[type='checkbox']:checked")).map(cb => cb.value), // Mengambil format buku (E-Book / Buku Fisik)
-        // sampul: document.getElementById("sampul").files[0] || null, // Mengambil file sampul jika ada
-        // ebook: document.getElementById("ebook").files[0] || null // Mengambil file e-book jika ada
-    };
-
-    console.log(bookData);
+    event.preventDefault();
+    console.log("📖 Updating Book ID:", bookId);
 
     try {
-        console.log("token",token)
-        const response = await fetch(`http://localhost:8080/api/books/${bookId}`,{
+        // First update the book data
+        const bookData = {
+            judul: document.getElementById("judul").value.trim(),
+            isbn: document.getElementById("isbn").value.trim(),
+            pengarang: document.getElementById("pengarang").value.trim(),
+            penerbit: document.getElementById("penerbit").value.trim(),
+            tahun: document.getElementById("tahun").value.trim(),
+            tanggal_pengadaan: document.getElementById("tanggal_pengadaan").value.trim(),
+            kategori: document.querySelector("input[name='category']:checked")?.value || "",
+            level: document.getElementById("level").value,
+            sinopsis: document.getElementById("sinopsis").value.trim(),
+            format: Array.from(document.querySelectorAll("input[type='checkbox']:checked")).map(cb => cb.value)
+        };
+
+        const response = await fetch(`http://localhost:8080/api/books/${bookId}`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -226,22 +252,56 @@ async function updateBook(event, bookId, token) {
             },
             body: JSON.stringify(bookData)
         });
-        const result = await response.json();
-        if (response.ok){
-            alert("Buku berhasil diUpdate!");
-            document.getElementById('bookForm').reset();
-            window.location.href = "<?= base_url('/beranda') ?>";
 
-        } else{
-            alert("Gagal menyimpan buku. Error: " + result.message);
+        if (!response.ok) {
+            const result = await response.json();
+            throw new Error(result.message || 'Failed to update book data');
         }
+
+        // Handle file uploads
+        const coverFile = document.getElementById('sampul').files[0];
+        const pdfFile = document.getElementById('ebook').files[0];
+
+        if (coverFile) {
+            const coverFormData = new FormData();
+            coverFormData.append('cover', coverFile);
+            const coverResponse = await fetch(`http://localhost:8080/api/books/${bookId}/upload-cover`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: coverFormData
+            });
+            
+            if (!coverResponse.ok) {
+                throw new Error('Failed to upload cover');
+            }
+        }
+
+        if (pdfFile) {
+            const pdfFormData = new FormData();
+            pdfFormData.append('pdf', pdfFile);
+            const pdfResponse = await fetch(`http://localhost:8080/api/books/${bookId}/upload-pdf`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: pdfFormData
+            });
+            
+            if (!pdfResponse.ok) {
+                throw new Error('Failed to upload PDF');
+            }
+        }
+
+        alert("✅ Buku berhasil diperbarui!");
+        window.location.href = "<?= base_url('/buku') ?>";
+
     } catch (error) {
-        console.log("Error:", error)
-        alert("Terjadi kesalahan saat mengupdate data.")
-        
+        console.error("🚨 Error updating book:", error);
+        alert("❌ Terjadi kesalahan: " + error.message);
     }
 }
-
 </script>
 
 <?= $this->endSection() ?>
