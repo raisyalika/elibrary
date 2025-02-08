@@ -50,8 +50,24 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Kategori*</label>
                     <select id="kategori" class="w-full p-2 border rounded-md">
+                        <option value="non_fiksi">Non Fiksi</option>
+                        <option value="dongeng">Dongeng</option>
+                        <option value="sains">Sains</option>
+                        <option value="komik">Komik</option>
+                        <option value="Novel">Novel</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Level*</label>
+                    <select id="level" class="w-full p-2 border rounded-md">
                         <option value="Kelas 1">Kelas 1</option>
                         <option value="Kelas 2">Kelas 2</option>
+                        <option value="Kelas 3">Kelas 3</option>
+                        <option value="Kelas 4">Kelas 4</option>
+                        <option value="Kelas 6">Kelas 6</option>
+                        <option value="Kelas 5">Kelas 5</option>
+                        <option value="Guru">Guru</option>
                     </select>
                 </div>
 
@@ -114,6 +130,7 @@
         tahun: document.getElementById("tahun").value.trim(),
         tanggal_pengadaan: document.getElementById("tanggal_pengadaan").value.trim(),
         kategori: document.getElementById("kategori").value.trim(),
+        level: document.getElementById("level").value.trim(),
         sinopsis: document.getElementById("sinopsis").value.trim(),
         format: [] // Format buku (E-Book / Buku Fisik)
     };
@@ -147,6 +164,8 @@
         if (response.ok) {
             alert("Buku berhasil ditambahkan!");
             document.getElementById("bookForm").reset();
+            window.location.href = "<?= base_url('/buku') ?>";
+
         } else {
             alert("Gagal menambahkan buku: " + JSON.stringify(result));
         }

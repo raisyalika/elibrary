@@ -1,62 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Anggota</title>
-    <link href="<?= base_url('css/style.css') ?>" rel="stylesheet">
-</head>
-<body class="bg-gray-100">
-    <div class="flex min-h-screen">
-        <!-- Sidebar (same as before) -->
-        <div class="w-64 bg-white shadow-lg">
-            <!-- Logo and Title -->
-            <div class="p-4">
-                <div class="flex items-center space-x-2">
-                    <img src="assets/img/logo.png" alt="Logo" class="w-8 h-8">
-                    <div>
-                        <h1 class="text-lg font-semibold text-gray-800">E-Library SDN</h1>
-                        <p class="text-sm text-gray-600">Jelambar Baru 07</p>
-                    </div>
-                </div>
-            </div>
+<?= $this->extend('layouts/main_admin') ?>
+<?= $this->section('content') ?>
 
-            <!-- Navigation -->
-            <nav class="mt-6">
-                <a href="/beranda" class="flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                    </svg>
-                    Beranda
-                </a>
-
-                <a href="/buku" class="flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                    </svg>
-                    Buku
-                </a>
-
-                <a href="/anggota" class="flex items-center px-6 py-3 bg-gradient-to-b from-[#EC2C5A] to-[#FA7C54] text-white">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                    </svg>
-                    Anggota
-                </a>
-
-                <a href="#" class="flex items-center px-6 py-3 text-red-500 hover:bg-gray-100 mt-auto">
-                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                    </svg>
-                    Keluar
-                </a>
-            </nav>
-        </div>
-
+<body class="bg-gray-100 flex flex-col w-full h-full">
         <!-- Main Content -->
         <div class="flex-1 p-8">
             <!-- Header -->
-            <div class="flex justify-between items-center mb-8">
+            <div class="flex justify-between items-center mb-8 p-4">
                 <h1 class="text-2xl font-bold bg-gradient-to-b from-[#EC2C5A] to-[#FA7C54] bg-clip-text text-transparent">Edit Anggota</h1>
                 <button id="closeBtn" class="text-gray-500 hover:text-gray-700">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,6 +34,11 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
                             <input type="text" id="memberName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Username</label>
+                            <input type="text" id="username" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500">
                         </div>
 
                         <div>
@@ -127,9 +81,9 @@
 
                     <!-- Action Buttons -->
                     <div class="flex justify-end space-x-4">
-                        <button type="button" id="cancelBtn" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        <a href="/anggota" id="cancelBtn" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
                             Batal
-                        </button>
+                        </a>
                         <button type="submit" class="bg-gradient-to-b from-[#FA7C54] to-[#EC2C5A] text-white px-6 py-2 rounded-lg hover:opacity-90 transition-opacity">
                             Simpan
                         </button>
@@ -138,82 +92,98 @@
             </div>
         </div>
     </div>
+</body>
+<script>
+        document.addEventListener("DOMContentLoaded", function(){
+            let userData =localStorage.getItem('user');
+            let token = localStorage.getItem('token');
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const memberId =urlParams.get('id')
+            console.log(token)
+            console.log(memberId)
+            if (userData){
+                let user =JSON.parse(userData);
+            }
 
-    <script>
+            if(token && memberId){
+                fetchMemberData(memberId, token);
+            }else{
+                console.warn('Token atau MemberId tidak ditemukan.')
+            }
+            document.getElementById('editMemberForm').addEventListener("submit", function(event) {
+                updateMember(event, memberId, token);
+            })
+        })
         // Function to fetch member data
-        async function fetchMemberData(memberId) {
+        async function fetchMemberData(memberId, token) {
             try {
-                const response = await fetch(`/api/members/${memberId}`);
-                if (!response.ok) throw new Error('Failed to fetch member data');
-                const data = await response.json();
-                
-                // Populate form fields
-                document.getElementById('memberId').value = data.id;
-                document.getElementById('memberName').value = data.name;
-                document.getElementById('memberAddress').value = data.address;
-                document.getElementById('memberLevel').value = data.level;
-                
-                // Set gender radio button
-                const genderInputs = document.getElementsByName('gender');
-                for (let input of genderInputs) {
-                    if (input.value === data.gender) {
-                        input.checked = true;
+                const response = await fetch(`http://localhost:8080/api/members/${memberId}`, {
+                    method : "GET",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
                     }
-                }
-
-                // Set profile photo if available
-                if (data.photo) {
-                    document.getElementById('memberPhoto').src = data.photo;
-                }
+                });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const result  = await response.json();
+                console.log(result)
+                populateForm(result)
             } catch (error) {
-                console.error('Error fetching member data:', error);
+                
             }
         }
 
-        // Handle form submission
-        document.getElementById('editMemberForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData();
-            formData.append('id', document.getElementById('memberId').value);
-            formData.append('name', document.getElementById('memberName').value);
-            formData.append('password', document.getElementById('memberPassword').value);
-            formData.append('gender', document.querySelector('input[name="gender"]:checked').value);
-            formData.append('level', document.getElementById('memberLevel').value);
-            formData.append('address', document.getElementById('memberAddress').value);
+        function populateForm(data){
+            document.getElementById('memberId').value = data.id_anggota;
+            document.getElementById('memberName').value = data.nama_anggota;
+            document.getElementById('username').value = data.username;
+            document.getElementById('memberPassword').value = "";
+            document.querySelector(`input[name="gender"][value="${data.jk_anggota}"]`).checked = true;
+            document.getElementById('memberLevel').value = data.level_anggota;
+            document.getElementById('memberAddress').value = data.alamat_anggota;
+            document.getElementById('memberPhoto').src = `/api/images/members/${data.id_anggota}`;
+        }
+
+// UPDATE MEMBER
+        async function updateMember(event, Id, token){
+            event.preventDefault();
+            console.log(Id)
+            console.log(token)
+
+            const memberData = {
+                id_anggota: document.getElementById('memberId').value.trim(),
+                nama_anggota: document.getElementById('memberName').value.trim(),
+                username: document.getElementById('username').value.trim(),
+                password: document.getElementById('memberPassword').value.trim(),
+                jk_anggota: document.querySelector('input[name="gender"]:checked').value.trim(),
+                level_anggota: document.getElementById('memberLevel').value.trim(),
+                alamat_anggota: document.getElementById('memberAddress').value.trim()
+            }
+            console.log(memberData)
+
 
             try {
-                const response = await fetch('/api/members/update', {
-                    method: 'POST',
-                    body: formData
+                const response = await fetch(`http://localhost:8080/api/members/${Id}`,{
+                    method : "PUT",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(memberData)
                 });
-
-                if (!response.ok) throw new Error('Failed to update member');
-                
-                // Handle successful update
-                window.location.href = '/anggota';
+                const result = await response.json();
+                if (response.ok){
+                    alert("Member berhasil diUpdate");
+                    document.getElementById('editMemberForm').reset();
+                    window.location.href = "<?= base_url('/anggota') ?>";
+                }else{
+                    alert("Gagal Meng-update Member. Error:"+result.message)
+                }
             } catch (error) {
-                console.error('Error updating member:', error);
+                console.log("Error:", error)
+                alert("Gagal Meng-update Member.")
             }
-        });
-
-        // Handle cancel button
-        document.getElementById('cancelBtn').addEventListener('click', () => {
-            window.location.href = '/anggota';
-        });
-
-        // Handle close button
-        document.getElementById('closeBtn').addEventListener('click', () => {
-            window.location.href = '/anggota';
-        });
-
-        // Fetch member data when page loads
-        // You would typically get the member ID from the URL or passed parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        const memberId = urlParams.get('id');
-        if (memberId) {
-            fetchMemberData(memberId);
         }
     </script>
-</body>
-</html>
+<?= $this->endSection() ?>

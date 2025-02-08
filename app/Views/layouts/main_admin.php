@@ -13,9 +13,9 @@
     
   </div>
   <!-- Include the Navbar for All Pages -->
-  <div class="flex-grow bg-gray-50 w-full">
-      <?= $this->renderSection('content') ?> <!-- Dynamic Content -->
-  </div>
+  <div class="flex-grow bg-gray-50 w-full p-4 md:p-6 md:ml-64">
+  <?= $this->renderSection('content') ?> <!-- Dynamic Content -->
+</div>
 
 </body>
 </html>
