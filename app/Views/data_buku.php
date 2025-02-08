@@ -75,37 +75,27 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-        let userData = localStorage.getItem("user"); 
-        let token = localStorage.getItem("token");
+    let userData = localStorage.getItem("user"); 
+    let token = localStorage.getItem("token");
 
-        if (userData) {
-        // Parse string JSON menjadi objek JavaScript
+    if (userData) {
         let user = JSON.parse(userData);
-        
-        // Ambil elemen h1 untuk menampilkan nama
         let nameElement = document.getElementById("userName");
-
-        // Tampilkan nama user di dalam h1
         nameElement.textContent = user.name;
-        console.log("User:", user);
     } else {
         console.warn("User data tidak ditemukan di localStorage.");
     }
 
-        // Jika ingin melihat semua isi localStorage
-        console.log("Isi localStorage:", localStorage);
+    if (token) {
+        fetchBooks(token);
+    } else {
+        console.warn("Token tidak ditemukan di localStorage.");
+    }
+});
 
-        if(token){
-            fetchBooks(token);
-        }
-        else{
-            console.warn("Token tidak ditemukan di localStorage.");
-        }
-    });
+let bookIdToDelete = null;
 
-// 
-    let bookIdToDelete = null;
-    async function fetchBooks(token) {
+async function fetchBooks(token) {
     try {
         const response = await fetch("http://localhost:8080/api/books", {
             method: "GET",
@@ -114,87 +104,91 @@ document.addEventListener("DOMContentLoaded", function () {
                 "Content-Type": "application/json"
             }
         });
-        
+
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        
+
         const result = await response.json();
         renderTable(result.data);
-        console.log('result fetch',result.data)
     } catch (error) {
         console.error("Error fetching books:", error);
     }
 }
 
-    function renderTable(data) {
-        const tableBody = document.getElementById('bookTableBody');
-        tableBody.innerHTML = '';
+function renderTable(data) {
+    const tableBody = document.getElementById('bookTableBody');
+    tableBody.innerHTML = '';
 
-        data.forEach((book,index) => {
-            const row = document.createElement('tr');
-            row.className = 'hover:bg-gray-50';
-            row.innerHTML = `
-                <td class="px-6 py-4 text-sm text-gray-900">${index+1}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${book.id_buku}</td>
-                <td class="px-6 py-4">
-                    <div class="w-12 h-12 bg-gray-200 rounded">
-                        <img src="${book.sampul}" alt="${book.judul}" class="w-full h-full object-cover rounded">
-                    </div>
-                </td>
-                <td class="px-6 py-4 text-sm text-gray-900">${book.judul}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${book.isbn}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${book.kategori}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${book.pengarang}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${book.penerbit}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${book.tahun}</td>
-                <td class="px-6 py-4 space-x-2 flex">
-                    <a href='buku/edit_buku?id=${book.id_buku}' class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs">Edit</a>
-                    <button onclick="openDeleteModal(${book.id_buku})" class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs">Hapus</button>
-                </td>
-            `;
-            tableBody.appendChild(row);
-        });
-    }
-
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const filteredBooks = books.filter(book => book.judul.toLowerCase().includes(searchTerm));
-        renderTable(filteredBooks);
+    data.forEach((book, index) => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50';
+        row.innerHTML = `
+            <td class="px-6 py-4 text-sm text-gray-900">${index + 1}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${book.id_buku}</td>
+            <td class="px-6 py-4">
+                <div class="w-12 h-12 bg-gray-200 rounded">
+                    <img src="${book.sampul}" alt="${book.judul}" class="w-full h-full object-cover rounded">
+                </div>
+            </td>
+            <td class="px-6 py-4 text-sm text-gray-900">${book.judul}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${book.isbn}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${book.kategori}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${book.pengarang}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${book.penerbit}</td>
+            <td class="px-6 py-4 text-sm text-gray-900">${book.tahun}</td>
+            <td class="px-6 py-4 space-x-2 flex">
+                <a href='buku/edit_buku?id=${book.id_buku}' class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs">Edit</a>
+                <button onclick="openDeleteModal(${book.id_buku})" class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs">Hapus</button>
+            </td>
+        `;
+        tableBody.appendChild(row);
     });
+}
 
+// Buka Modal Delete
+function openDeleteModal(bookId) {
+    bookIdToDelete = bookId;
+    document.getElementById("deleteModal").classList.remove("hidden");
+}
 
+// Tutup Modal
+document.getElementById("cancelDelete").addEventListener("click", function () {
+    document.getElementById("deleteModal").classList.add("hidden");
+    bookIdToDelete = null;
+});
 
-     // Buka Modal Delete
-        function openDeleteModal(bookId) {
-            anggotaIdDelete = bookId;
-            document.getElementById("deleteModal").classList.remove("hidden");
-        }
+// Konfirmasi Hapus
+document.getElementById("confirmDelete").addEventListener("click", async function () {
+    if (bookIdToDelete !== null) {
+        await deleteBook(bookIdToDelete);
+        document.getElementById("deleteModal").classList.add("hidden");
+        bookIdToDelete = null;
+    }
+});
 
-        // Tutup Modal
-        document.getElementById("cancelDelete").addEventListener("click", function () {
-            document.getElementById("deleteModal").classList.add("hidden");
-            anggotaIdDelete = null;
-        });
-
-        // Konfirmasi Hapus
-        document.getElementById("confirmDelete").addEventListener("click", function () {
-            if (anggotaIdDelete !== null) {
-                deleteBook(anggotaIdDelete);
-                document.getElementById("deleteModal").classList.add("hidden");
-                anggotaIdDelete = null;
+// Hapus Buku dari Database
+async function deleteBook(bookId) {
+    let token = localStorage.getItem("token");
+    try {
+        const response = await fetch(`http://localhost:8080/api/books/${bookId}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
             }
         });
 
-         // Hapus Buku dari Tabel
-        function deleteBook(anggotaId) {
-            const index = anggotas.findIndex(anggota => anggota.id === anggotaId);
-            if (index !== -1) {
-                anggotas.splice(index, 1);
-                renderBooks(); // Render ulang tabel
-            }
+        if (!response.ok) {
+            throw new Error(`Gagal menghapus buku: ${response.statusText}`);
         }
 
+        // Refresh tabel setelah penghapusan
+        fetchBooks(token);
+    } catch (error) {
+        console.error("Error deleting book:", error);
+    }
+}
 </script>
 
 <?= $this->endSection() ?>
