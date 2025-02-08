@@ -56,6 +56,7 @@ $routes->group('api', ['namespace' => 'App\Controllers'], function ($routes) {
         $routes->get('(:num)', 'MemberController::show/$1');
         $routes->put('(:num)', 'MemberController::update/$1');
         $routes->delete('(:num)', 'MemberController::delete/$1');
+        $routes->post('(:num)/upload-profile-picture', 'MemberController::uploadProfilePicture/$1');
     });
     });
 });

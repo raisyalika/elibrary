@@ -57,7 +57,7 @@
           localStorage.setItem("token", data.token);
           localStorage.setItem("user", JSON.stringify(data.user));
           alert("Login berhasil!");
-          window.location.href = "<?= base_url('profile') ?>";
+          window.location.href = "<?= base_url('dashboard_user') ?>";
         } else {
           alert("Login gagal: " + (data.message || "Username atau password salah!"));
         }
