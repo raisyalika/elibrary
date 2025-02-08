@@ -1,4 +1,99 @@
-<script>
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - E-Library SDN Jelambar Baru 07</title>
+    <link href="<?= base_url('css/style.css') ?>" rel="stylesheet">
+</head>
+<body class="flex flex-col min-h-screen bg-gray-50">
+    <!-- Header -->
+    <header class="bg-orange-500 text-white sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <img src="assets/img/logo.png" alt="Logo" class="w-10 h-10">
+                <h1 class="text-xl font-bold">E-Library SDN Jelambar Baru 07</h1>
+            </div>
+            <div class="space-x-2">
+                <a href="#" class="hover:underline">Profil</a>
+                <a href="#" class="hover:underline">Keluar</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <div class="max-w-3xl mx-auto">
+            <!-- Profile Picture Section -->
+            <div class="flex flex-col items-center mb-8">
+                <div class="relative">
+                    <img id="profilePicture" 
+                        src="assets/img/profile.jpg" 
+                        alt="Profile Picture" 
+                        class="w-32 h-32 rounded-full object-cover mb-4 border border-gray-300 shadow-md">
+                    
+                    <!-- Edit Profile Picture Button -->
+                    <button id="uploadPictureBtn" 
+                            class="absolute bottom-4 right-0 bg-orange-500 text-white p-2 rounded-full hover:bg-orange-600 shadow-lg">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                        </svg>
+                    </button>
+                </div>
+             
+            </div>
+
+            <!-- Profile Form -->
+            <form id="profileForm" class="space-y-6">
+                <div>
+                    <label for="memberId" class="block text-sm font-medium text-gray-700">ID Anggota</label>
+                    <input type="text" id="memberId" name="memberId" class="block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-100" readonly>
+                </div>
+
+                <div>
+                    <label for="fullName" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                    <input type="text" id="fullName" name="fullName" class="block w-full rounded-md border-gray-300 shadow-sm p-2">
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" name="password" class="block w-full rounded-md border-gray-300 shadow-sm p-2">
+                </div>
+
+                <div>
+                    <label for="gender" class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
+                    <select id="gender" name="gender" class="block w-full rounded-md border-gray-300 shadow-sm p-2">
+                        <option value="L">Laki-laki</option>
+                        <option value="P">Perempuan</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="level" class="block text-sm font-medium text-gray-700">Level</label>
+                    <select id="level" name="level" class="block w-full rounded-md border-gray-300 shadow-sm p-2">
+                        <option value="Kelas 1">Kelas 1</option>
+                        <option value="Kelas 2">Kelas 2</option>
+                        <option value="Kelas 3">Kelas 3</option>
+                        <option value="Kelas 4">Kelas 4</option>
+                        <option value="Kelas 5">Kelas 5</option>
+                        <option value="Kelas 6">Kelas 6</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="address" class="block text-sm font-medium text-gray-700">Alamat</label>
+                    <textarea id="address" name="address" rows="3" class="block w-full rounded-md border-gray-300 shadow-sm p-2"></textarea>
+                </div>
+
+                <button type="button" id="saveProfileBtn" class="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md mt-2">
+                    Simpan
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <script>
 document.addEventListener("DOMContentLoaded", async function () {
     const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("user"));
@@ -13,80 +108,75 @@ document.addEventListener("DOMContentLoaded", async function () {
     try {
         const response = await fetch(apiUrl, {
             method: "GET",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
+            headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
         });
 
-        if (!response.ok) {
-            throw new Error("Unauthorized or failed to fetch user data.");
-        }
+        if (!response.ok) throw new Error("Failed to fetch user data");
 
         const data = await response.json();
 
-        // Populate profile fields
         document.getElementById("memberId").value = data.id_anggota;
         document.getElementById("fullName").value = data.nama_anggota;
-        document.getElementById("password").value = "********"; // Masked
-        document.getElementById("gender").value = data.jk_anggota === "L" ? "Laki-laki" : "Perempuan";
+        document.getElementById("password").value = "********";
+        document.getElementById("gender").value = data.jk_anggota;
         document.getElementById("level").value = data.level_anggota;
         document.getElementById("address").value = data.alamat_anggota;
-
-        // Update profile picture if available
-        if (data.foto_url) {
-            document.getElementById("profilePicture").src = data.foto_url;
-        }
+        if (data.foto_url) document.getElementById("profilePicture").src = data.foto_url;
 
     } catch (error) {
-        console.error("Error fetching user profile:", error);
-        alert("Gagal mengambil data profil. Silakan coba lagi.");
+        alert("Gagal mengambil data profil.");
     }
 });
 
-// Toggle password visibility
-document.getElementById("togglePassword").addEventListener("click", function() {
-    const passwordInput = document.getElementById("password");
-    const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
-    passwordInput.setAttribute("type", type);
-});
+// Handle Profile Picture Upload
+document.getElementById("uploadPictureBtn").addEventListener("click", function () {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
 
-// Handle profile picture upload
-document.getElementById('editPictureBtn').addEventListener('click', function() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    
-    input.onchange = async function(event) {
+    input.onchange = async function (event) {
         const file = event.target.files[0];
         if (!file) return;
 
         const formData = new FormData();
-        formData.append('profilePicture', file);
+        formData.append("profilePicture", file);
 
-        const user = JSON.parse(localStorage.getItem('user')); 
-        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem("user"));
+        const token = localStorage.getItem("token");
 
-        try {
-            const response = await fetch(`http://localhost:8080/api/members/${user.id}/upload-profile-picture`, {
-                method: "POST",
-                headers: { "Authorization": `Bearer ${token}` },
-                body: formData
-            });
+        const response = await fetch(`http://localhost:8080/api/members/${user.id}/upload-profile-picture`, {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${token}` },
+            body: formData
+        });
 
-            const data = await response.json();
-
-            if (data.foto_url) {
-                document.getElementById('profilePicture').src = data.foto_url;
-            } else {
-                alert("Failed to upload profile picture.");
-            }
-        } catch (error) {
-            console.error("Error uploading:", error);
-        }
+        const data = await response.json();
+        if (data.foto_url) document.getElementById("profilePicture").src = data.foto_url;
     };
-    
+
     input.click();
 });
 
+// Handle Profile Update
+document.getElementById("saveProfileBtn").addEventListener("click", async function () {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("token");
+
+    const updatedData = {
+        nama_anggota: document.getElementById("fullName").value,
+        jk_anggota: document.getElementById("gender").value,
+        level_anggota: document.getElementById("level").value,
+        alamat_anggota: document.getElementById("address").value
+    };
+
+    await fetch(`http://localhost:8080/api/members/${user.id}`, {
+        method: "PUT",
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(updatedData)
+    });
+
+    alert("Profil berhasil diperbarui!");
+});
 </script>
+</body>
+</html>
