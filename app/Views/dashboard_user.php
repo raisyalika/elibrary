@@ -153,6 +153,44 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentPage = 1;
     let perPage = 10;
 
+    // Add pagination controls
+    function createPaginationControls(pagination) {
+        const paginationDiv = document.createElement('div');
+        paginationDiv.className = 'flex justify-center gap-4 mt-8';
+        
+        // Previous page button
+        if (pagination.prev_page) {
+            const prevButton = document.createElement('button');
+            prevButton.className = 'px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300';
+            prevButton.textContent = 'Previous';
+            prevButton.onclick = () => {
+                currentPage = pagination.prev_page;
+                fetchBooks();
+            };
+            paginationDiv.appendChild(prevButton);
+        }
+        
+        // Page info
+        const pageInfo = document.createElement('span');
+        pageInfo.className = 'px-4 py-2 text-gray-700';
+        pageInfo.textContent = `Page ${pagination.current_page} of ${pagination.total_pages}`;
+        paginationDiv.appendChild(pageInfo);
+        
+        // Next page button
+        if (pagination.next_page) {
+            const nextButton = document.createElement('button');
+            nextButton.className = 'px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300';
+            nextButton.textContent = 'Next';
+            nextButton.onclick = () => {
+                currentPage = pagination.next_page;
+                fetchBooks();
+            };
+            paginationDiv.appendChild(nextButton);
+        }
+        
+        return paginationDiv;
+    }
+
     window.fetchBooks = function () {
         let searchQuery = searchInput.value.trim();
         let url = `http://localhost:8080/api/books?page=${currentPage}&per_page=${perPage}`;
@@ -160,6 +198,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (currentKategori) url += `&kategori=${encodeURIComponent(currentKategori)}`;
         if (currentLevel) url += `&level=${encodeURIComponent(currentLevel)}`;
         if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
+
+        bookContainer.innerHTML = '<div class="text-center text-gray-500">Loading books...</div>';
 
         fetch(url, {
             method: "GET",
@@ -186,22 +226,40 @@ document.addEventListener("DOMContentLoaded", function () {
             data.data.forEach(book => {
                 const bookCard = `
                     <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col sm:flex-row gap-4 border border-gray-200">
-                        <img src="${book.sampul_url || '/default-cover.jpg'}" alt="${book.judul}" class="w-32 object-cover rounded-md shadow-md">
+                        <img src="${book.sampul_url || '/api/placeholder/120/160'}" alt="${book.judul}" 
+                             class="w-32 h-40 object-cover rounded-md shadow-md">
                         <div class="flex-1">
                             <h3 class="font-bold text-lg mb-2">${book.judul}</h3>
-                            <p class="text-sm text-gray-600 mb-1">${book.pengarang}, ${book.penerbit}, ${book.tahun}</p>
-                            <p class="text-sm text-gray-500 mb-2">${book.kategori}</p>
-                            <p class="text-sm text-gray-600 mb-4">${book.sinopsis || "Sinopsis tidak tersedia"}</p>
-                            <p class="text-xs text-gray-400 mb-2">ISBN: ${book.isbn}</p>
+                            <p class="text-sm text-gray-600 mb-1">
+                                ${book.pengarang ? book.pengarang : 'Unknown Author'}${book.penerbit ? `, ${book.penerbit}` : ''}${book.tahun && book.tahun !== '0000' ? `, ${book.tahun}` : ''}
+                            </p>
+                            <p class="text-sm text-gray-500 mb-2">${book.kategori || 'Uncategorized'}</p>
+                            <p class="text-sm text-gray-600 mb-4">${book.sinopsis || "No synopsis available"}</p>
+                            <p class="text-xs text-gray-400 mb-2">ISBN: ${book.isbn || 'N/A'}</p>
                             <div class="flex gap-2">
-                                ${book.ebook === "Y" ? `<button class="bg-orange-500 text-white px-4 py-1 rounded-full text-sm shadow-md">E-Book</button>` : ""}
-                                ${book.buku_fisik === "Y" ? `<button class="bg-white border border-green-500 text-green-500 px-4 py-1 rounded-full text-sm shadow-md">Buku Fisik</button>` : ""}
+                              ${book.file_ebook_url ? 
+    `<a href="${book.file_ebook_url}" target="_blank" class="inline-flex items-center bg-orange-500 text-white px-4 py-1 rounded-full text-sm shadow-md hover:bg-orange-600 transition-colors">
+        <span class="mr-1">📚</span> Baca E-Book
+    </a>` : 
+    ''
+}
+                                ${book.buku_fisik === "Y" ? 
+                                    `<button class="inline-flex items-center bg-white border border-green-500 text-green-500 px-4 py-1 rounded-full text-sm shadow-md">
+                                        <span class="mr-1">📖</span> Buku Fisik
+                                    </button>` : 
+                                    ''
+                                }
                             </div>
                         </div>
                     </div>
                 `;
                 bookContainer.innerHTML += bookCard;
             });
+
+            // Add pagination controls
+            if (data.pagination) {
+                bookContainer.appendChild(createPaginationControls(data.pagination));
+            }
         })
         .catch(error => {
             console.error("Error fetching books:", error);
@@ -209,29 +267,32 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     };
 
-    // 🔹 Handle Kategori Filter
+    // Handle Kategori Filter
     kategoriButtons.forEach(button => {
         button.addEventListener("click", function () {
             kategoriButtons.forEach(btn => btn.classList.remove("active"));
             this.classList.add("active");
             currentKategori = this.getAttribute("data-kategori");
+            currentPage = 1; // Reset to first page when filtering
             fetchBooks();
         });
     });
 
-    // 🔹 Handle Level Filter
+    // Handle Level Filter
     levelButtons.forEach(button => {
         button.addEventListener("click", function () {
             levelButtons.forEach(btn => btn.classList.remove("active"));
             this.classList.add("active");
             currentLevel = this.getAttribute("data-level");
+            currentPage = 1; // Reset to first page when filtering
             fetchBooks();
         });
     });
 
-    // 🔹 Handle Enter Key for Search
+    // Handle Search
     searchInput.addEventListener("keydown", function (event) {
         if (event.key === "Enter") {
+            currentPage = 1; // Reset to first page when searching
             fetchBooks();
         }
     });

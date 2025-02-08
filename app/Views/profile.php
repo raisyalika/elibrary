@@ -1,25 +1,11 @@
-<!DOCTYPE html>
-<html lang="id" class="h-full">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - E-Library SDN Jelambar Baru 07</title>
-    <link href="<?= base_url('css/style.css') ?>" rel="stylesheet">
-</head>
+<?= $this->extend('layouts/main') ?>
+
+<?= $this->section('content') ?>
+
+
 <body class="flex flex-col min-h-screen bg-gray-50">
     <!-- Header -->
-    <header class="bg-orange-500 text-white sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <img src="assets/img/logo.png" alt="Logo" class="w-10 h-10">
-                <h1 class="text-xl font-bold">E-Library SDN Jelambar Baru 07</h1>
-            </div>
-            <div class="space-x-2">
-                <a href="#" class="hover:underline">Profil</a>
-                <a href="#" class="hover:underline">Keluar</a>
-            </div>
-        </div>
-    </header>
+    
 
     <!-- Main Content -->
     <main class="flex-grow container mx-auto px-4 py-8">
@@ -93,7 +79,10 @@
         </div>
     </main>
 
-    <script>
+   
+</body>
+
+<script>
 document.addEventListener("DOMContentLoaded", async function () {
     const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("user"));
@@ -178,5 +167,5 @@ document.getElementById("saveProfileBtn").addEventListener("click", async functi
     alert("Profil berhasil diperbarui!");
 });
 </script>
-</body>
-</html>
+
+<?= $this->endSection() ?>

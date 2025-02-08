@@ -101,6 +101,68 @@ class BookController extends ResourceController
         ]);
     }
 
+
+
+    public function uploadCover($id)
+    {
+        $file = $this->request->getFile('cover');
+
+        if (!$file || !$file->isValid()) {
+            return $this->fail('No file uploaded or file is invalid.');
+        }
+
+        if ($file->hasMoved()) {
+            return $this->fail('File already moved.');
+        }
+
+        // Save the file
+        $newName = $file->getRandomName();
+        $file->move('uploads/book_covers/', $newName);
+        $coverUrl = base_url("uploads/book_covers/{$newName}");
+
+        // Update database
+        $this->bookModel->update($id, ['sampul_url' => $coverUrl]);
+
+        return $this->respond([
+            'status' => 200,
+            'message' => 'Book cover uploaded successfully',
+            'sampul_url' => $coverUrl
+        ]);
+    }
+
+    // 📌 Upload PDF File
+    public function uploadPDF($id)
+    {
+        $file = $this->request->getFile('pdf');
+
+        if (!$file || !$file->isValid()) {
+            return $this->fail('No file uploaded or file is invalid.');
+        }
+
+        if ($file->hasMoved()) {
+            return $this->fail('File already moved.');
+        }
+
+        // Validate PDF type
+        if ($file->getMimeType() !== 'application/pdf') {
+            return $this->fail('Invalid file type. Only PDFs are allowed.');
+        }
+
+        // Save the file
+        $newName = $file->getRandomName();
+        $file->move('uploads/book_pdfs/', $newName);
+        $pdfUrl = base_url("uploads/book_pdfs/{$newName}");
+
+        // Update database
+        $this->bookModel->update($id, ['file_ebook_url' => $pdfUrl]);
+
+        return $this->respond([
+            'status' => 200,
+            'message' => 'PDF file uploaded successfully',
+            'pdf_url' => $pdfUrl
+        ]);
+    }
+
     // ✏️ Update a Book
     public function update($id = null)
     {

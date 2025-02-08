@@ -11,7 +11,7 @@ class BookModel extends Model
     protected $allowedFields = [
         'judul', 'isbn', 'pengarang', 'penerbit', 'tahun',
         'kategori', 'level','tgl_pengadaan', 'ebook', 'buku_fisik',
-        'file_ebook', 'sampul', 'sinopsis'
+        'file_ebook_url', 'sampul_url', 'sinopsis'
     ];
     
     protected $validationRules = [

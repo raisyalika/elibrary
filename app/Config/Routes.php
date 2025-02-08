@@ -48,6 +48,8 @@ $routes->group('api', ['namespace' => 'App\Controllers'], function ($routes) {
         $routes->get('(:num)', 'BookController::show/$1');
         $routes->put('(:num)', 'BookController::update/$1');
         $routes->delete('(:num)', 'BookController::delete/$1');
+        $routes->post('(:num)/upload-cover', 'BookController::uploadCover/$1');
+        $routes->post('(:num)/upload-pdf', 'BookController::uploadPDF/$1');
     });
 
     $routes->group('members', function ($routes) {
