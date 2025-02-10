@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-class page extends BaseController
+class Page extends BaseController
 {
   public function about()
   {
