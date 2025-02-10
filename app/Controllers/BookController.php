@@ -12,16 +12,17 @@ class BookController extends ResourceController
     public function __construct()
     {
         $this->bookModel = new BookModel();
+        helper('url'); // Load the URL helper to use base_url()
     }
 
     // 📚 Get All Books
     public function index()
     {
-        $perPage = $this->request->getGet('per_page') ?? 10;
-        $page = $this->request->getGet('page') ?? 1;
+        $perPage  = $this->request->getGet('per_page') ?? 10;
+        $page     = $this->request->getGet('page') ?? 1;
         $kategori = $this->request->getGet('kategori');
-        $level = $this->request->getGet('level');
-        $search = $this->request->getGet('search');
+        $level    = $this->request->getGet('level');
+        $search   = $this->request->getGet('search');
 
         $query = $this->bookModel;
 
@@ -42,20 +43,20 @@ class BookController extends ResourceController
                 ->groupEnd();
         }
 
-        $books = $query->paginate($perPage, 'default', $page);
-        $pager = $this->bookModel->pager;
+        $books  = $query->paginate($perPage, 'default', $page);
+        $pager  = $this->bookModel->pager;
 
         return $this->respond([
-            'status' => 200,
-            'message' => 'Books retrieved successfully',
-            'data' => $books,
+            'status'     => 200,
+            'message'    => 'Books retrieved successfully',
+            'data'       => $books,
             'pagination' => [
                 'current_page' => $pager->getCurrentPage(),
-                'per_page' => $pager->getPerPage(),
-                'total_pages' => $pager->getPageCount(),
-                'total_books' => $pager->getTotal(),
-                'next_page' => $pager->getNextPageURI(),
-                'prev_page' => $pager->getPreviousPageURI()
+                'per_page'     => $pager->getPerPage(),
+                'total_pages'  => $pager->getPageCount(),
+                'total_books'  => $pager->getTotal(),
+                'next_page'    => $pager->getNextPageURI(),
+                'prev_page'    => $pager->getPreviousPageURI()
             ]
         ]);
     }
@@ -79,10 +80,10 @@ class BookController extends ResourceController
 
         // Validation Rules
         $rules = [
-            'judul' => 'required|min_length[3]',
-            'isbn' => 'required|min_length[10]',
+            'judul'     => 'required|min_length[3]',
+            'isbn'      => 'required|min_length[10]',
             'pengarang' => 'required',
-            'penerbit' => 'required'
+            'penerbit'  => 'required'
         ];
 
         if (!$this->validate($rules)) {
@@ -97,12 +98,11 @@ class BookController extends ResourceController
 
         return $this->respondCreated([
             'message' => 'Book created successfully',
-            'id' => $id
+            'id'      => $id
         ]);
     }
 
-
-
+    // Upload Book Cover
     public function uploadCover($id)
     {
         $file = $this->request->getFile('cover');
@@ -118,14 +118,16 @@ class BookController extends ResourceController
         // Save the file
         $newName = $file->getRandomName();
         $file->move('uploads/book_covers/', $newName);
+
+        // Build the URL using CodeIgniter's base_url() helper
         $coverUrl = base_url("uploads/book_covers/{$newName}");
 
         // Update database
         $this->bookModel->update($id, ['sampul_url' => $coverUrl]);
 
         return $this->respond([
-            'status' => 200,
-            'message' => 'Book cover uploaded successfully',
+            'status'     => 200,
+            'message'    => 'Book cover uploaded successfully',
             'sampul_url' => $coverUrl
         ]);
     }
@@ -151,13 +153,15 @@ class BookController extends ResourceController
         // Save the file
         $newName = $file->getRandomName();
         $file->move('uploads/book_pdfs/', $newName);
+
+        // Build the URL using CodeIgniter's base_url() helper
         $pdfUrl = base_url("uploads/book_pdfs/{$newName}");
 
         // Update database
         $this->bookModel->update($id, ['file_ebook_url' => $pdfUrl]);
 
         return $this->respond([
-            'status' => 200,
+            'status'  => 200,
             'message' => 'PDF file uploaded successfully',
             'pdf_url' => $pdfUrl
         ]);

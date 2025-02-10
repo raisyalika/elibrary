@@ -81,9 +81,9 @@
 
                     <!-- Action Buttons -->
                     <div class="flex justify-end space-x-4">
-                        <a href="/anggota" id="cancelBtn" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-                            Batal
-                        </a>
+                    <a href="<?= base_url('anggota') ?>" id="cancelBtn" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+    Batal
+</a>
                         <button type="submit" class="bg-gradient-to-b from-[#FA7C54] to-[#EC2C5A] text-white px-6 py-2 rounded-lg hover:opacity-90 transition-opacity">
                             Simpan
                         </button>
@@ -94,42 +94,78 @@
     </div>
 </body>
 <script>
+    const baseURL = '<?= base_url() ?>';
 document.addEventListener("DOMContentLoaded", function(){
+    console.log("🟢 DOMContentLoaded event fired");
+
     let userData = localStorage.getItem('user');
     let token = localStorage.getItem('token');
-    
+
+    // Debug logging
+    console.log('🔍 Initial values:', {
+        baseURL,
+        hasUserData: !!userData,
+        hasToken: !!token
+    });
+
     const urlParams = new URLSearchParams(window.location.search);
     const memberId = urlParams.get('id');
     
-    console.log("🛠 Token:", token);
-    console.log("🆔 Member ID:", memberId);
+    console.log('🔍 URL params:', {
+        memberId,
+        fullURL: window.location.href
+    });
 
     if (userData){
         let user = JSON.parse(userData);
-        console.log("👤 User Data:", user);
+        console.log('🔍 Parsed user data:', user);
     }
 
     if(token && memberId){
+        console.log('✅ Conditions met, attempting to fetch data...');
         fetchMemberData(memberId, token);
         fetchProfilePicture(memberId, token);
     } else {
-        console.warn('⚠️ Token atau MemberId tidak ditemukan.');
+        console.warn('⚠️ Token atau MemberId tidak ditemukan:', {
+            token: !!token,
+            memberId: !!memberId
+        });
     }
 
-    document.getElementById('editMemberForm').addEventListener("submit", function(event) {
-        updateMember(event, memberId, token);
-    });
+    // Check if form exists
+    const form = document.getElementById('editMemberForm');
+    if(form) {
+        console.log('✅ Form found, adding submit listener');
+        form.addEventListener("submit", function(event) {
+            updateMember(event, memberId, token);
+        });
+    } else {
+        console.error('❌ Form element not found!');
+    }
 
-    document.getElementById('editPhotoBtn').addEventListener("click", function(){
-        handleProfilePictureUpload(memberId, token);
-    });
+    // Check if photo button exists
+    const photoBtn = document.getElementById('editPhotoBtn');
+    if(photoBtn) {
+        console.log('✅ Photo button found, adding click listener');
+        photoBtn.addEventListener("click", function(){
+            handleProfilePictureUpload(memberId, token);
+        });
+    } else {
+        console.error('❌ Photo button element not found!');
+    }
 });
 
-// 🟢 Fetch Member Data
+// Modify fetchMemberData with more logging
 async function fetchMemberData(memberId, token) {
-    console.log(`📡 Fetching member data for ID: ${memberId}`);
+    const url = `${baseURL}api/members/${memberId}`;
+    console.log('🔍 Attempting fetch:', {
+        url,
+        hasToken: !!token,
+        memberId
+    });
+
     try {
-        const response = await fetch(`http://localhost:8080/api/members/${memberId}`, {
+        const response = await fetch(url, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`,
@@ -137,34 +173,41 @@ async function fetchMemberData(memberId, token) {
             }
         });
 
-        console.log("📩 API Response:", response);
+        console.log('🔍 Response received:', {
+            status: response.status,
+            ok: response.ok,
+            statusText: response.statusText
+        });
 
         if (!response.ok) {
-            throw new Error(`❌ HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const result = await response.json();
-        console.log("✅ Member Data:", result);
+        console.log('✅ Data received:', result);
         populateForm(result);
     } catch (error) {
-        console.error("🚨 Error fetching member data:", error);
+        console.error("🚨 Detailed error:", {
+            message: error.message,
+            error: error
+        });
         alert("❌ Gagal mengambil data anggota. Silakan coba lagi.");
     }
 }
 
-// 🟢 Fetch Profile Picture with Better Error Handling
 async function fetchProfilePicture(memberId, token) {
-    console.log(`📡 Fetching profile picture for ID: ${memberId}`);
     const imgElement = document.getElementById('memberPhoto');
     
-    // Set default image and properties
+    // Change the placeholder URL to a default image in your assets
+    const placeholderImage = `${baseURL}assets/img/default-profile.png`;
+    
     imgElement.onerror = function() {
-        this.src = '/api/placeholder/120/120';
-        this.onerror = null; // Prevent infinite loop
+        this.src = placeholderImage;
+        this.onerror = null;
     };
 
     try {
-        const response = await fetch(`http://localhost:8080/api/members/${memberId}/profile-picture`, {
+        const response = await fetch(`${baseURL}api/members/${memberId}/profile-picture`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`
@@ -176,32 +219,18 @@ async function fetchProfilePicture(memberId, token) {
         }
 
         const result = await response.json();
-        console.log("🖼 Profile Picture Data:", result);
 
         if (result.foto_url) {
-            // Create a temporary image to verify the URL
-            const tempImg = new Image();
-            tempImg.onload = function() {
-                imgElement.src = result.foto_url;
-            };
-            tempImg.onerror = function() {
-                console.error("Failed to load image from URL:", result.foto_url);
-                imgElement.src = '/api/placeholder/120/120';
-            };
-            tempImg.src = result.foto_url;
+            imgElement.src = result.foto_url;
         } else {
-            imgElement.src = '/api/placeholder/120/120';
+            imgElement.src = placeholderImage;
         }
     } catch (error) {
         console.error("🚨 Error with profile picture:", error);
-        imgElement.src = '/api/placeholder/120/120';
+        imgElement.src = placeholderImage;
     }
 }
-
-// 🟢 Simplified Profile Picture Upload
 function handleProfilePictureUpload(memberId, token) {
-    console.log("📸 Initializing profile picture upload...");
-
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
@@ -215,11 +244,9 @@ function handleProfilePictureUpload(memberId, token) {
         formData.append('profilePicture', file);
 
         try {
-            // Show loading state
-            const originalSrc = imgElement.src;
             imgElement.src = '/api/placeholder/120/120';
 
-            const response = await fetch(`http://localhost:8080/api/members/${memberId}/upload-profile-picture`, {
+            const response = await fetch(`${baseURL}api/members/${memberId}/upload-profile-picture`, { // ✅ Changed localhost to baseURL
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -234,17 +261,8 @@ function handleProfilePictureUpload(memberId, token) {
             }
 
             if (result.foto_url) {
-                // Verify the new image URL works
-                const tempImg = new Image();
-                tempImg.onload = function() {
-                    imgElement.src = result.foto_url;
-                    alert("✅ Foto profil berhasil diperbarui!");
-                };
-                tempImg.onerror = function() {
-                    imgElement.src = originalSrc;
-                    throw new Error('Failed to load uploaded image');
-                };
-                tempImg.src = result.foto_url;
+                imgElement.src = result.foto_url;
+                alert("✅ Foto profil berhasil diperbarui!");
             } else {
                 throw new Error('No image URL in response');
             }
@@ -257,7 +275,6 @@ function handleProfilePictureUpload(memberId, token) {
 
     input.click();
 }
-
 // Update the populateForm function to handle images better
 function populateForm(data) {
     console.log("🔄 Populating form with data:", data);
@@ -285,10 +302,8 @@ function populateForm(data) {
         imgElement.src = '/api/placeholder/120/120';
     }
 }
-// 🟢 Update Member Data (PUT)
 async function updateMember(event, memberId, token) {
     event.preventDefault();
-    console.log("🛠 Updating member ID:", memberId);
     
     const memberData = {
         id_anggota: document.getElementById('memberId').value.trim(),
@@ -300,10 +315,8 @@ async function updateMember(event, memberId, token) {
         alamat_anggota: document.getElementById('memberAddress').value.trim()
     };
 
-    console.log("📡 Sending Update Data:", memberData);
-
     try {
-        const response = await fetch(`http://localhost:8080/api/members/${memberId}`, {
+        const response = await fetch(`${baseURL}api/members/${memberId}`, { // ✅ Changed localhost to baseURL
             method: "PUT",
             headers: {
                 "Authorization": `Bearer ${token}`,
@@ -313,14 +326,12 @@ async function updateMember(event, memberId, token) {
         });
 
         const result = await response.json();
-        console.log("📩 Update Response:", result);
 
         if (response.ok) {
             alert("✅ Member berhasil diperbarui!");
             document.getElementById('editMemberForm').reset();
             window.location.href = "<?= base_url('/anggota') ?>";
         } else {
-            console.error("🚨 Update Failed:", result);
             alert(`❌ Gagal mengupdate member: ${JSON.stringify(result)}`);
         }
     } catch (error) {

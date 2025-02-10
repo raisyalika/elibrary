@@ -14,7 +14,7 @@
                 <!-- Profile Photo Upload -->
                 <div class="flex flex-col items-center">
                     <div class="relative">
-                        <img id="profilePicturePreview" src="assets/img/profile.jpg" class="w-32 h-32 rounded-full object-cover mb-4 border border-gray-300 shadow-md">
+                        <img id="profilePicturePreview" src="<?= base_url('assets/img/profile.jpg') ?>" class="w-32 h-32 rounded-full object-cover mb-4 border border-gray-300 shadow-md">
                     </div>
                     <input type="file" id="profilePicture" accept="image/*" class="hidden">
                     <button type="button" id="uploadPictureBtn" class="bg-orange-500 text-white px-4 py-2 rounded-lg shadow-md mt-2">
@@ -63,6 +63,7 @@
                             <option value="Kelas 5">Kelas 5</option>
                             <option value="Kelas 6">Kelas 6</option>
                             <option value="Guru">Guru</option>
+                            <option value="Lainnya">Lainnya</option>
                         </select>
                     </div>
 
@@ -82,16 +83,18 @@
         </div>
     </div>
 </body>
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     console.log("🔹 Script loaded: Ready to handle user creation");
 
+    const baseURL = "<?= rtrim(base_url(), '/') ?>/"; // ✅ Ensure base URL is formatted correctly
     const token = localStorage.getItem("token");
     let newMemberId = null;
 
     if (!token) {
         alert("Unauthorized! Please log in.");
-        window.location.href = "<?= base_url('login-admin') ?>";
+        window.location.href = baseURL + "login-admin";
         return;
     }
 
@@ -125,7 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
             console.log("📡 Sending request to create user:", anggotaData);
-            const createResponse = await fetch("http://localhost:8080/api/members", {
+            const createResponse = await fetch(`${baseURL}api/members`, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -134,27 +137,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 body: JSON.stringify(anggotaData)
             });
 
-            console.log("📩 Response received:", createResponse);
             const createData = await createResponse.json();
-            console.log("✅ User creation response:", createData);
 
             if (!createResponse.ok) {
-                // If there's a validation error, show an alert with the details
-                if (createData.messages) {
-                    let errorMsg = "❌ Gagal menambahkan anggota:\n";
-                    for (const [field, message] of Object.entries(createData.messages)) {
-                        console.error(`🚨 Error in ${field}:`, message);
-                        errorMsg += `- ${message}\n`;
-                    }
-                    alert(errorMsg);
-                } else {
-                    alert(`❌ Gagal menambahkan anggota: ${createData.message}`);
-                }
+                alert(`❌ Gagal menambahkan anggota: ${createData.message}`);
                 return;
             }
 
             newMemberId = createData.data.id_anggota;
-            console.log("✅ User successfully created with ID:", newMemberId);
 
             // Upload Profile Picture (if selected)
             const fileInput = document.getElementById("profilePicture");
@@ -164,15 +154,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 const formData = new FormData();
                 formData.append("profilePicture", file);
 
-                const uploadResponse = await fetch(`http://localhost:8080/api/members/${newMemberId}/upload-profile-picture`, {
+                const uploadResponse = await fetch(`${baseURL}api/members/${newMemberId}/upload-profile-picture`, {
                     method: "POST",
                     headers: { "Authorization": `Bearer ${token}` },
                     body: formData
                 });
 
-                console.log("📩 Upload response:", uploadResponse);
                 const uploadData = await uploadResponse.json();
-                console.log("✅ Upload response data:", uploadData);
 
                 if (!uploadResponse.ok) throw new Error(uploadData.message || "Gagal mengunggah foto.");
 
@@ -180,7 +168,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             alert("✅ Anggota berhasil ditambahkan!");
-            window.location.href = "<?= base_url('/anggota') ?>";
+            window.location.href = baseURL + "anggota";
 
         } catch (error) {
             console.error("🚨 Error:", error);
@@ -189,6 +177,5 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
-
 
 <?= $this->endSection() ?>

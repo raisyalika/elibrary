@@ -6,21 +6,21 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 // $routes->get('/', 'Home::index');
-$routes->get('/', 'Page::about');
-$routes->get('contact', 'Page::contact');
-$routes->get('login-admin', 'page::login');
+$routes->get('/', 'Page::login_user');
+
+$routes->get('login-admin', 'Page::login');
 $routes->get('login-user', 'Page::login_user');
-$routes->get('register', 'page::register');
-$routes->get('dashboard_user', "page::dashboard_user");
-$routes->get('ebook', 'page::ebook');
-$routes->get('profile', 'page::profile');
-$routes->get('beranda', 'page::beranda');
-$routes->get('anggota','page::data_anggota');
-$routes->get('buku', 'page::data_buku');
-$routes->get('buku/tambah_buku', 'page::tambah_buku');
-$routes->get('buku/edit_buku', 'page::edit_buku');
-$routes->get('anggota/tambah_anggota', "page::tambah_anggota");
-$routes->get('anggota/edit_anggota', "page::edit_anggota");
+$routes->get('register', 'Page::register');
+$routes->get('dashboard_user', "Page::dashboard_user");
+$routes->get('ebook', 'Page::ebook');
+$routes->get('profile', 'Page::profile');
+$routes->get('beranda', 'Page::beranda');
+$routes->get('anggota','Page::data_anggota');
+$routes->get('buku', 'Page::data_buku');
+$routes->get('buku/tambah_buku', 'Page::tambah_buku');
+$routes->get('buku/edit_buku', 'Page::edit_buku');
+$routes->get('anggota/tambah_anggota', "Page::tambah_anggota");
+$routes->get('anggota/edit_anggota', "Page::edit_anggota");
 
 // API
 $routes->get('/api','ApiController::index');
