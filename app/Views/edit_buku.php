@@ -120,6 +120,10 @@
                         <button id="simpanButton" type="submit" class="w-full py-2 px-4 bg-gradient-to-b from-[#FA7C54] to-[#EC2C5A] text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
                             Simpan
                         </button>
+                        <a href="<?= base_url('buku') ?>" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+    Batal
+</a>
+
                     </div>
                 </form>
 
@@ -129,6 +133,7 @@
 </body>
 
 <script>
+    const baseURL = "<?= base_url() ?>"; 
 document.addEventListener("DOMContentLoaded", function () {
     let userData = localStorage.getItem("user"); 
     let token = localStorage.getItem("token");
@@ -152,7 +157,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 async function fetchBook(bookId, token) {
     try {
-        const response = await fetch(`http://localhost:8080/api/books/${bookId}`, {
+        const response = await fetch(`${baseURL}api/books/${bookId}`, { // ✅ Changed localhost to baseURL
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -165,9 +170,6 @@ async function fetchBook(bookId, token) {
         }
 
         const result = await response.json();
-        console.log("📖 Book Data:", result);
-        
-        // Ensure the data is correctly passed to populateForm
         populateForm(result);
 
     } catch (error) {
@@ -224,13 +226,10 @@ function populateForm(data) {
 }
 
 
-
 async function updateBook(event, bookId, token) {
     event.preventDefault();
-    console.log("📖 Updating Book ID:", bookId);
 
     try {
-        // First update the book data
         const bookData = {
             judul: document.getElementById("judul").value.trim(),
             isbn: document.getElementById("isbn").value.trim(),
@@ -244,7 +243,7 @@ async function updateBook(event, bookId, token) {
             format: Array.from(document.querySelectorAll("input[type='checkbox']:checked")).map(cb => cb.value)
         };
 
-        const response = await fetch(`http://localhost:8080/api/books/${bookId}`, {
+        const response = await fetch(`${baseURL}api/books/${bookId}`, { // ✅ Changed localhost to baseURL
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -258,41 +257,9 @@ async function updateBook(event, bookId, token) {
             throw new Error(result.message || 'Failed to update book data');
         }
 
-        // Handle file uploads
-        const coverFile = document.getElementById('sampul').files[0];
-        const pdfFile = document.getElementById('ebook').files[0];
-
-        if (coverFile) {
-            const coverFormData = new FormData();
-            coverFormData.append('cover', coverFile);
-            const coverResponse = await fetch(`http://localhost:8080/api/books/${bookId}/upload-cover`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: coverFormData
-            });
-            
-            if (!coverResponse.ok) {
-                throw new Error('Failed to upload cover');
-            }
-        }
-
-        if (pdfFile) {
-            const pdfFormData = new FormData();
-            pdfFormData.append('pdf', pdfFile);
-            const pdfResponse = await fetch(`http://localhost:8080/api/books/${bookId}/upload-pdf`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: pdfFormData
-            });
-            
-            if (!pdfResponse.ok) {
-                throw new Error('Failed to upload PDF');
-            }
-        }
+        // ✅ Upload Cover & PDF
+        await uploadFile(bookId, token, 'cover', 'upload-cover');
+        await uploadFile(bookId, token, 'ebook', 'upload-pdf');
 
         alert("✅ Buku berhasil diperbarui!");
         window.location.href = "<?= base_url('/buku') ?>";
@@ -300,6 +267,27 @@ async function updateBook(event, bookId, token) {
     } catch (error) {
         console.error("🚨 Error updating book:", error);
         alert("❌ Terjadi kesalahan: " + error.message);
+    }
+}
+
+// 🟢 Upload File Function
+async function uploadFile(bookId, token, inputId, apiEndpoint) {
+    const file = document.getElementById(inputId).files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append(inputId, file);
+
+    const response = await fetch(`${baseURL}api/books/${bookId}/${apiEndpoint}`, { // ✅ Changed localhost to baseURL
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+        body: formData
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to upload ${inputId}`);
     }
 }
 </script>

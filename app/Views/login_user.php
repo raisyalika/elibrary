@@ -34,39 +34,57 @@
   </div>
 
   <script>
-    document.getElementById("userLoginForm").addEventListener("submit", function(event) {
-      event.preventDefault();
+   document.getElementById("userLoginForm").addEventListener("submit", function(event) {
+  event.preventDefault();
 
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
 
-      const requestBody = {
-        username_or_email: username,
-        password: password,
-        user_type: "member"
-      };
+  const requestBody = {
+    username_or_email: username,
+    password: password,
+    user_type: "member"
+  };
 
-      fetch("<?= base_url('api/login') ?>", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody)
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.token) {
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("user", JSON.stringify(data.user));
-          alert("Login berhasil!");
-          window.location.href = "<?= base_url('dashboard_user') ?>";
-        } else {
-          alert("Login gagal: " + (data.message || "Username atau password salah!"));
-        }
-      })
-      .catch(error => {
-        alert("Login gagal, silakan coba lagi.");
-        console.error("Login error:", error);
-      });
+  fetch("https://elibrary-jelambarbaru.my.id/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(requestBody)
+  })
+  .then(response => {
+    // Log the entire response for debugging
+    console.log('Full response:', response);
+    
+    // Check if the response is OK before parsing
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return response.json();
+  })
+  .then(data => {
+    console.log('Parsed response data:', data);
+    
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      alert("Login berhasil!");
+      window.location.href = "<?= base_url('dashboard_user') ?>";
+    } else {
+      alert("Login gagal: " + (data.message || "Username atau password salah!"));
+    }
+  })
+  .catch(error => {
+    // More detailed error logging
+    console.error("Login error details:", {
+      message: error.message,
+      name: error.name,
+      stack: error.stack
     });
+    
+    alert("Login gagal, silakan coba lagi: " + error.message);
+  });
+});
   </script>
 </body>
 </html>

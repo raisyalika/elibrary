@@ -16,50 +16,68 @@ class MemberController extends ResourceController
 
     public function uploadProfilePicture($id)
     {
-        // Get the uploaded file
-        $file = $this->request->getFile('profilePicture');
+        log_message('debug', 'Upload request received for user ID: ' . $id);
     
-        // If no file is received or invalid file, return an error
-        if (!$file || !$file->isValid()) {
-            return $this->fail('No file uploaded or file is invalid.');
-        }
-    
-        // Check if the file has already been moved (prevents duplicate moves)
-        if ($file->hasMoved()) {
-            return $this->fail('File already moved.');
-        }
-    
-        // Generate a random file name
-        $newName = $file->getRandomName();
-        
-        // Move file to uploads folder
-        if (!$file->move(ROOTPATH . 'public/uploads/profile_pictures/', $newName)) {
-            return $this->fail('Failed to move uploaded file.');
-        }
-    
-        // Generate the URL for the uploaded profile picture
-        $fileUrl = base_url("uploads/profile_pictures/{$newName}");
-    
-        // Ensure the user exists before updating
+        // ✅ Ensure the user exists
         $member = $this->memberModel->find($id);
         if (!$member) {
+            log_message('error', 'Member not found: ' . $id);
             return $this->failNotFound('Member not found.');
         }
     
-        // Update the database with the new file URL
-        $updated = $this->memberModel->update($id, ['foto_url' => $fileUrl]);
+        // ✅ Get the uploaded file
+        $file = $this->request->getFile('profilePicture');
     
-        if (!$updated) {
+        // ✅ Validate if file is uploaded
+        if (!$file || !$file->isValid()) {
+            log_message('error', 'Invalid file upload for user ID: ' . $id);
+            return $this->fail('No file uploaded or file is invalid.');
+        }
+    
+        // ✅ Ensure we are using the correct public_html path (Same as upload_cover & pdf)
+        $uploadPath = $_SERVER['DOCUMENT_ROOT'] . '/uploads/profile_pictures/';
+    
+        // ✅ Ensure the directory exists
+        if (!is_dir($uploadPath)) {
+            mkdir($uploadPath, 0777, true);
+            log_message('debug', 'Created directory: ' . $uploadPath);
+        }
+    
+        // ✅ Generate a unique file name
+        $newName = $file->getRandomName();
+    
+        // ✅ Move the uploaded file to the correct location
+        if (!$file->move($uploadPath, $newName)) {
+            log_message('error', 'Failed to move uploaded file for user ID: ' . $id);
+            return $this->fail('Failed to move uploaded file.');
+        }
+    
+        // ✅ Verify if the file was moved successfully
+        if (!file_exists($uploadPath . $newName)) {
+            log_message('error', 'File move failed: File does not exist at ' . $uploadPath . $newName);
+            return $this->fail('File was not saved correctly.');
+        }
+    
+        // ✅ Generate the correct public URL for the uploaded profile picture
+        $fileUrl = base_url("uploads/profile_pictures/{$newName}");
+    
+        // ✅ Update the database with the correct path
+        if (!$this->memberModel->update($id, ['foto_url' => $fileUrl])) {
+            log_message('error', 'Failed to update database with profile picture for user ID: ' . $id);
             return $this->fail('Failed to update profile picture in database.');
         }
     
-        // Return a success response
+        log_message('debug', 'Profile picture uploaded successfully for user ID: ' . $id);
+    
+        // ✅ Return success response
         return $this->respond([
             'status' => 200,
             'message' => 'Profile picture uploaded successfully',
             'foto_url' => $fileUrl
         ]);
     }
+    
+
     
 
 
@@ -115,7 +133,7 @@ class MemberController extends ResourceController
             'username' => 'required|is_unique[anggota.username]',
             'password' => 'required|min_length[6]',
             'jk_anggota' => 'required|in_list[L,P]',
-            'level_anggota' => 'required|in_list[Kelas 1,Kelas 2,Kelas 3,Kelas 4,Kelas 5,Kelas 6,Guru]',
+            'level_anggota' => 'required|in_list[Kelas 1,Kelas 2,Kelas 3,Kelas 4,Kelas 5,Kelas 6,Guru,Lainnya]',
             'alamat_anggota' => 'required'
         ];
     
@@ -164,65 +182,69 @@ class MemberController extends ResourceController
     }
 
     public function update($id = null)
-{
-    // Check if member exists
-    $member = $this->memberModel->find($id);
-    if (!$member) {
-        return $this->failNotFound('Member not found');
-    }
-
-    // Get raw input data and ensure it's properly decoded
-    $json = $this->request->getBody();
-    try {
-        $data = json_decode($json, true);
-        
-        // If json_decode failed or returned null
-        if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
-            log_message('error', 'JSON decode error: ' . json_last_error_msg());
-            return $this->fail('Invalid JSON data');
+    {
+        // ✅ Check if member exists
+        $member = $this->memberModel->find($id);
+        if (!$member) {
+            return $this->failNotFound('Member not found');
         }
-        
-        log_message('debug', 'Decoded update data: ' . print_r($data, true));
-    } catch (\Exception $e) {
-        log_message('error', 'JSON parsing error: ' . $e->getMessage());
-        return $this->fail('Failed to parse input data');
-    }
-
-    // Validate input data
-    $rules = [
-        'nama_anggota' => 'required|min_length[3]',
-        'username' => "required|is_unique[anggota.username,id_anggota,$id]",
-        'jk_anggota' => 'required|in_list[L,P]',
-        'level_anggota' => 'required|in_list[Kelas 1,Kelas 2,Kelas 3,Kelas 4,Kelas 5,Kelas 6,Guru]',
-        'alamat_anggota' => 'required'
-    ];
-
-    if (!$this->validate($rules)) {
-        return $this->fail($this->validator->getErrors());
-    }
-
-    // Only hash password if it's provided
-    if (isset($data['password']) && !empty($data['password'])) {
-        $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
-    } else {
-        unset($data['password']);
-    }
-
-    try {
-        $updated = $this->memberModel->update($id, $data);
-        if ($updated) {
-            return $this->respond([
-                'status' => 200,
-                'message' => 'Member updated successfully',
-                'data' => $this->memberModel->find($id)
-            ]);
+    
+        // ✅ Get raw input data
+        $json = $this->request->getBody();
+        try {
+            $data = json_decode($json, true);
+            if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
+                log_message('error', 'JSON decode error: ' . json_last_error_msg());
+                return $this->fail('Invalid JSON data');
+            }
+        } catch (\Exception $e) {
+            log_message('error', 'JSON parsing error: ' . $e->getMessage());
+            return $this->fail('Failed to parse input data');
         }
-        return $this->fail($this->memberModel->errors());
-    } catch (\Exception $e) {
-        log_message('error', 'Update error: ' . $e->getMessage());
-        return $this->fail('Failed to update member: ' . $e->getMessage());
+    
+        // ✅ Allow the same username for updates
+        $usernameRule = 'required';
+        if (isset($data['username']) && $data['username'] !== $member['username']) {
+            $usernameRule .= '|is_unique[anggota.username]';
+        }
+    
+        // ✅ Validation Rules
+        $rules = [
+            'nama_anggota' => 'required|min_length[3]',
+            'username' => $usernameRule,
+            'jk_anggota' => 'required|in_list[L,P]',
+            'level_anggota' => 'required|in_list[Kelas 1,Kelas 2,Kelas 3,Kelas 4,Kelas 5,Kelas 6,Guru]',
+            'alamat_anggota' => 'required'
+        ];
+    
+        if (!$this->validate($rules)) {
+            return $this->fail($this->validator->getErrors());
+        }
+    
+        // ✅ Only hash password if provided
+        if (isset($data['password']) && !empty($data['password'])) {
+            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        } else {
+            unset($data['password']);
+        }
+    
+        // ✅ Update Member Data
+        try {
+            $updated = $this->memberModel->update($id, $data);
+            if ($updated) {
+                return $this->respond([
+                    'status' => 200,
+                    'message' => 'Member updated successfully',
+                    'data' => $this->memberModel->find($id)
+                ]);
+            }
+            return $this->fail($this->memberModel->errors());
+        } catch (\Exception $e) {
+            log_message('error', 'Update error: ' . $e->getMessage());
+            return $this->fail('Failed to update member: ' . $e->getMessage());
+        }
     }
-}
+    
 
 
     // Delete member

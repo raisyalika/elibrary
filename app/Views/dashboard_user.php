@@ -96,7 +96,19 @@
         }
     }
 </style>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard</title>
+  <link href="<?= base_url('css/style.css') ?>" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    
+</body>
+</html>
 <!-- 🔹 Search Bar -->
 <div class="search-container">
     <div class="search-box shadow-md">
@@ -104,6 +116,8 @@
         <button onclick="fetchBooks()">🔍</button>
     </div>
 </div>
+
+<body>
 <div class="filter-section">
     <p class="filter-title">Filter Buku</p>
 
@@ -137,6 +151,7 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    const apiBaseUrl = "<?= base_url('api/books') ?>";
     const token = localStorage.getItem("token");
     if (!token) {
         window.location.href = "<?= base_url('login_user') ?>";
@@ -191,81 +206,99 @@ document.addEventListener("DOMContentLoaded", function () {
         return paginationDiv;
     }
 
-    window.fetchBooks = function () {
-        let searchQuery = searchInput.value.trim();
-        let url = `http://localhost:8080/api/books?page=${currentPage}&per_page=${perPage}`;
+   window.fetchBooks = function () {
+    let searchQuery = searchInput.value.trim();
+    let url = "https://elibrary-jelambarbaru.my.id/api/books";
 
-        if (currentKategori) url += `&kategori=${encodeURIComponent(currentKategori)}`;
-        if (currentLevel) url += `&level=${encodeURIComponent(currentLevel)}`;
-        if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
+    // Add query parameters
+    const params = new URLSearchParams();
+    params.append('page', currentPage);
+    params.append('per_page', perPage);
+    
+    if (searchQuery) params.append('search', searchQuery);
+    if (currentKategori) params.append('kategori', currentKategori);
+    if (currentLevel) params.append('level', currentLevel);
 
-        bookContainer.innerHTML = '<div class="text-center text-gray-500">Loading books...</div>';
+    // Add parameters to URL
+    url += `?${params.toString()}`;
 
-        fetch(url, {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json",
-            },
-        })
-        .then(response => {
-            if (response.status === 401) {
-                window.location.href = "<?= base_url('login_user') ?>";
-                throw new Error('Unauthorized');
+    console.log("Fetching books from URL:", url);
+
+    fetch(url, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`, // Ensure this is the correct token format
+            "Content-Type": "application/json",
+            "Accept": "application/json" // Explicitly request JSON
+        },
+    })
+    .then(response => {
+        console.log("Response status:", response.status);
+        
+        // Log the full response for debugging
+        return response.json().then(data => {
+            if (!response.ok) {
+                console.error("Error response:", data);
+                throw new Error(data.message || 'Failed to fetch books');
             }
-            return response.json();
-        })
-        .then(data => {
-            bookContainer.innerHTML = "";
+            return data;
+        });
+    })
+    .then(data => {
+        console.log("Received book data:", data);
+        
+        // Rest of your existing rendering logic
+        bookContainer.innerHTML = "";
 
-            if (!data || !data.data.length) {
-                bookContainer.innerHTML = '<div class="text-center text-gray-500">No books found</div>';
-                return;
-            }
+        if (!data || !data.data.length) {
+            bookContainer.innerHTML = '<div class="text-center text-gray-500">No books found</div>';
+            return;
+        }
 
-            data.data.forEach(book => {
-                const bookCard = `
-                    <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col sm:flex-row gap-4 border border-gray-200">
-                        <img src="${book.sampul_url || '/api/placeholder/120/160'}" alt="${book.judul}" 
-                             class="w-32 h-40 object-cover rounded-md shadow-md">
-                        <div class="flex-1">
-                            <h3 class="font-bold text-lg mb-2">${book.judul}</h3>
-                            <p class="text-sm text-gray-600 mb-1">
-                                ${book.pengarang ? book.pengarang : 'Unknown Author'}${book.penerbit ? `, ${book.penerbit}` : ''}${book.tahun && book.tahun !== '0000' ? `, ${book.tahun}` : ''}
-                            </p>
-                            <p class="text-sm text-gray-500 mb-2">${book.kategori || 'Uncategorized'}</p>
-                            <p class="text-sm text-gray-600 mb-4">${book.sinopsis || "No synopsis available"}</p>
-                            <p class="text-xs text-gray-400 mb-2">ISBN: ${book.isbn || 'N/A'}</p>
-                            <div class="flex gap-2">
-                              ${book.file_ebook_url ? 
-    `<a href="${book.file_ebook_url}" target="_blank" class="inline-flex items-center bg-orange-500 text-white px-4 py-1 rounded-full text-sm shadow-md hover:bg-orange-600 transition-colors">
-        <span class="mr-1">📚</span> Baca E-Book
-    </a>` : 
-    ''
-}
-                                ${book.buku_fisik === "Y" ? 
-                                    `<button class="inline-flex items-center bg-white border border-green-500 text-green-500 px-4 py-1 rounded-full text-sm shadow-md">
-                                        <span class="mr-1">📖</span> Buku Fisik
-                                    </button>` : 
-                                    ''
-                                }
-                            </div>
+        data.data.forEach(book => {
+            const bookCard = `
+                <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col sm:flex-row gap-4 border border-gray-200">
+                    <img src="${book.sampul_url || '/api/placeholder/120/160'}" alt="${book.judul}" 
+                         class="w-32 h-40 object-cover rounded-md shadow-md">
+                    <div class="flex-1">
+                        <h3 class="font-bold text-lg mb-2">${book.judul}</h3>
+                        <p class="text-sm text-gray-600 mb-1">
+                            ${book.pengarang ? book.pengarang : 'Unknown Author'}${book.penerbit ? `, ${book.penerbit}` : ''}${book.tahun && book.tahun !== '0000' ? `, ${book.tahun}` : ''}
+                        </p>
+                        <p class="text-sm text-gray-500 mb-2">${book.kategori || 'Uncategorized'}</p>
+                        <p class="text-sm text-gray-600 mb-4">${book.sinopsis || "No synopsis available"}</p>
+                        <p class="text-xs text-gray-400 mb-2">ISBN: ${book.isbn || 'N/A'}</p>
+                        <div class="flex gap-2">
+                            ${book.file_ebook_url ? 
+                                `<a href="${book.file_ebook_url}" target="_blank" class="inline-flex items-center bg-orange-500 text-white px-4 py-1 rounded-full text-sm shadow-md hover:bg-orange-600 transition-colors">
+                                    <span class="mr-1">📚</span> Baca E-Book
+                                </a>` : 
+                                ''
+                            }
+                            ${book.buku_fisik === "Y" ? 
+                                `<button class="inline-flex items-center bg-white border border-green-500 text-green-500 px-4 py-1 rounded-full text-sm shadow-md">
+                                    <span class="mr-1">📖</span> Buku Fisik
+                                </button>` : 
+                                ''
+                            }
                         </div>
                     </div>
-                `;
-                bookContainer.innerHTML += bookCard;
-            });
-
-            // Add pagination controls
-            if (data.pagination) {
-                bookContainer.appendChild(createPaginationControls(data.pagination));
-            }
-        })
-        .catch(error => {
-            console.error("Error fetching books:", error);
-            bookContainer.innerHTML = '<div class="text-center text-red-500">Error loading books. Please try again later.</div>';
+                </div>
+            `;
+            bookContainer.innerHTML += bookCard;
         });
-    };
+
+        // Add pagination controls
+        if (data.pagination) {
+            bookContainer.appendChild(createPaginationControls(data.pagination));
+        }
+    })
+    .catch(error => {
+        console.error("Full error details:", error);
+        console.log("Token:", token);
+        bookContainer.innerHTML = `<div class="text-center text-red-500">Error loading books: ${error.message}</div>`;
+    });
+};
 
     // Handle Kategori Filter
     kategoriButtons.forEach(button => {
@@ -300,5 +333,8 @@ document.addEventListener("DOMContentLoaded", function () {
     fetchBooks();
 });
 </script>
+
+</body>
+</html>
 
 <?= $this->endSection() ?>

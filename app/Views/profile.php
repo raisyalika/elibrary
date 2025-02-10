@@ -2,11 +2,7 @@
 
 <?= $this->section('content') ?>
 
-
 <body class="flex flex-col min-h-screen bg-gray-50">
-    <!-- Header -->
-    
-
     <!-- Main Content -->
     <main class="flex-grow container mx-auto px-4 py-8">
         <div class="max-w-3xl mx-auto">
@@ -14,7 +10,7 @@
             <div class="flex flex-col items-center mb-8">
                 <div class="relative">
                     <img id="profilePicture" 
-                        src="assets/img/profile.jpg" 
+                        src="<?= base_url('assets/img/profile.jpg') ?>" 
                         alt="Profile Picture" 
                         class="w-32 h-32 rounded-full object-cover mb-4 border border-gray-300 shadow-md">
                     
@@ -27,16 +23,10 @@
                         </svg>
                     </button>
                 </div>
-             
             </div>
 
             <!-- Profile Form -->
             <form id="profileForm" class="space-y-6">
-                <div>
-                    <label for="memberId" class="block text-sm font-medium text-gray-700">ID Anggota</label>
-                    <input type="text" id="memberId" name="memberId" class="block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-100" readonly>
-                </div>
-
                 <div>
                     <label for="fullName" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
                     <input type="text" id="fullName" name="fullName" class="block w-full rounded-md border-gray-300 shadow-sm p-2">
@@ -64,6 +54,7 @@
                         <option value="Kelas 4">Kelas 4</option>
                         <option value="Kelas 5">Kelas 5</option>
                         <option value="Kelas 6">Kelas 6</option>
+                        <option value="Lainnya">Lainnya</option>
                     </select>
                 </div>
 
@@ -78,21 +69,21 @@
             </form>
         </div>
     </main>
-
-   
 </body>
 
 <script>
+const baseUrl = "<?= rtrim(base_url(), '/') ?>/";
+
 document.addEventListener("DOMContentLoaded", async function () {
     const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("user"));
 
     if (!token || !user || !user.id) {
-        window.location.href = "<?= base_url('login_user') ?>";
+        window.location.href = baseUrl + "login_user";
         return;
     }
 
-    const apiUrl = `http://localhost:8080/api/members/${user.id}`;
+    const apiUrl = `${baseUrl}api/members/${user.id}`;
 
     try {
         const response = await fetch(apiUrl, {
@@ -104,20 +95,23 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         const data = await response.json();
 
-        document.getElementById("memberId").value = data.id_anggota;
         document.getElementById("fullName").value = data.nama_anggota;
         document.getElementById("password").value = "********";
         document.getElementById("gender").value = data.jk_anggota;
         document.getElementById("level").value = data.level_anggota;
         document.getElementById("address").value = data.alamat_anggota;
-        if (data.foto_url) document.getElementById("profilePicture").src = data.foto_url;
+
+        if (data.foto_url) {
+            document.getElementById("profilePicture").src = data.foto_url;
+        }
 
     } catch (error) {
+        console.error("Profile fetch error:", error);
         alert("Gagal mengambil data profil.");
     }
 });
 
-// Handle Profile Picture Upload
+
 document.getElementById("uploadPictureBtn").addEventListener("click", function () {
     const input = document.createElement("input");
     input.type = "file";
@@ -132,19 +126,35 @@ document.getElementById("uploadPictureBtn").addEventListener("click", function (
 
         const user = JSON.parse(localStorage.getItem("user"));
         const token = localStorage.getItem("token");
+        const apiUrl = `${baseUrl}api/members/${user.id}/upload-profile-picture`;
 
-        const response = await fetch(`http://localhost:8080/api/members/${user.id}/upload-profile-picture`, {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${token}` },
-            body: formData
-        });
+        try {
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${token}` },
+                body: formData
+            });
 
-        const data = await response.json();
-        if (data.foto_url) document.getElementById("profilePicture").src = data.foto_url;
+            const data = await response.json();
+            console.log("Upload Response:", data);
+
+            if (!response.ok || !data.foto_url) {
+                throw new Error(data.message || "Upload failed.");
+            }
+
+            // ✅ Update profile picture preview
+            document.getElementById("profilePicture").src = data.foto_url;
+            alert("Profile picture uploaded successfully!");
+
+        } catch (error) {
+            console.error("Upload error:", error);
+            alert(error.message);
+        }
     };
 
     input.click();
 });
+
 
 // Handle Profile Update
 document.getElementById("saveProfileBtn").addEventListener("click", async function () {
@@ -155,17 +165,34 @@ document.getElementById("saveProfileBtn").addEventListener("click", async functi
         nama_anggota: document.getElementById("fullName").value,
         jk_anggota: document.getElementById("gender").value,
         level_anggota: document.getElementById("level").value,
-        alamat_anggota: document.getElementById("address").value
+        alamat_anggota: document.getElementById("address").value,
+        username: user.username
     };
 
-    await fetch(`http://localhost:8080/api/members/${user.id}`, {
-        method: "PUT",
-        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify(updatedData)
-    });
+    try {
+        const response = await fetch(`${baseUrl}api/members/${user.id}`, {
+            method: "PUT",
+            headers: { 
+                "Authorization": `Bearer ${token}`, 
+                "Content-Type": "application/json" 
+            },
+            body: JSON.stringify(updatedData)
+        });
 
-    alert("Profil berhasil diperbarui!");
+        const responseData = await response.json();
+        console.log("Response Data:", responseData);
+
+        if (response.ok && responseData.success) {
+            alert("Profil berhasil diperbarui!");
+        } else {
+            throw new Error(responseData.message || "Unknown error occurred.");
+        }
+    } catch (error) {
+        console.error("Profile update error:", error);
+        alert(error.message);
+    }
 });
+
 </script>
 
 <?= $this->endSection() ?>
