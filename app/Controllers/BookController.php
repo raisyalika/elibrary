@@ -81,7 +81,6 @@ class BookController extends ResourceController
         // Validation Rules
         $rules = [
             'judul'     => 'required|min_length[3]',
-            'isbn'      => 'required|min_length[10]',
             'pengarang' => 'required',
             'penerbit'  => 'required'
         ];
