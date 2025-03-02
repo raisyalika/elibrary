@@ -80,6 +80,10 @@ class Page extends BaseController
   {
     return view('edit_anggota');
   }
+  public function pdf_viewer()
+  {
+    return view('pdf_viewer');
+  }
 
 }
 

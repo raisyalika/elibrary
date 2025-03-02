@@ -6,8 +6,13 @@
     <!-- Main Content -->
     <main class="flex-grow container mx-auto px-4 py-8">
         <div class="max-w-3xl mx-auto">
-            <!-- Profile Picture Section -->
-            <div class="flex flex-col items-center mb-8">
+            <!-- Back to Dashboard -->
+            <a href="<?= base_url('dashboard_user') ?>" class="text-blue-500 hover:underline flex items-center mb-4">
+                ← Kembali ke Dashboard
+            </a>
+
+           <!-- Profile Picture Section -->
+           <div class="flex flex-col items-center mb-8">
                 <div class="relative">
                     <img id="profilePicture" 
                         src="<?= base_url('assets/img/profile.jpg') ?>" 
@@ -29,43 +34,31 @@
             <form id="profileForm" class="space-y-6">
                 <div>
                     <label for="fullName" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                    <input type="text" id="fullName" name="fullName" class="block w-full rounded-md border-gray-300 shadow-sm p-2">
+                    <input type="text" id="fullName" class="block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-100" readonly>
                 </div>
 
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                    <input type="password" id="password" name="password" class="block w-full rounded-md border-gray-300 shadow-sm p-2">
+                    <div class="flex items-center space-x-2">
+                        <input type="password" id="password" class="block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-100" readonly>
+                      
+                    </div>
                 </div>
 
                 <div>
                     <label for="gender" class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
-                    <select id="gender" name="gender" class="block w-full rounded-md border-gray-300 shadow-sm p-2">
-                        <option value="L">Laki-laki</option>
-                        <option value="P">Perempuan</option>
-                    </select>
+                    <input type="text" id="gender" class="block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-100" readonly>
                 </div>
 
                 <div>
                     <label for="level" class="block text-sm font-medium text-gray-700">Level</label>
-                    <select id="level" name="level" class="block w-full rounded-md border-gray-300 shadow-sm p-2">
-                        <option value="Kelas 1">Kelas 1</option>
-                        <option value="Kelas 2">Kelas 2</option>
-                        <option value="Kelas 3">Kelas 3</option>
-                        <option value="Kelas 4">Kelas 4</option>
-                        <option value="Kelas 5">Kelas 5</option>
-                        <option value="Kelas 6">Kelas 6</option>
-                        <option value="Lainnya">Lainnya</option>
-                    </select>
+                    <input type="text" id="level" class="block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-100" readonly>
                 </div>
 
                 <div>
                     <label for="address" class="block text-sm font-medium text-gray-700">Alamat</label>
-                    <textarea id="address" name="address" rows="3" class="block w-full rounded-md border-gray-300 shadow-sm p-2"></textarea>
+                    <textarea id="address" rows="3" class="block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-100" readonly></textarea>
                 </div>
-
-                <button type="button" id="saveProfileBtn" class="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md mt-2">
-                    Simpan
-                </button>
             </form>
         </div>
     </main>
@@ -79,7 +72,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const user = JSON.parse(localStorage.getItem("user"));
 
     if (!token || !user || !user.id) {
-        window.location.href = baseUrl + "login_user";
+        window.location.href = baseUrl + "login-user";
         return;
     }
 
@@ -111,7 +104,19 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 });
 
+// Toggle Password Visibility with Orange Button
+document.getElementById("togglePassword").addEventListener("click", function () {
+    const passwordField = document.getElementById("password");
+    if (passwordField.type === "password") {
+        passwordField.type = "text";
+        this.textContent = "Hide";
+    } else {
+        passwordField.type = "password";
+        this.textContent = "Show";
+    }
+});
 
+// Handle Profile Picture Upload
 document.getElementById("uploadPictureBtn").addEventListener("click", function () {
     const input = document.createElement("input");
     input.type = "file";
@@ -154,45 +159,6 @@ document.getElementById("uploadPictureBtn").addEventListener("click", function (
 
     input.click();
 });
-
-
-// Handle Profile Update
-document.getElementById("saveProfileBtn").addEventListener("click", async function () {
-    const user = JSON.parse(localStorage.getItem("user"));
-    const token = localStorage.getItem("token");
-
-    const updatedData = {
-        nama_anggota: document.getElementById("fullName").value,
-        jk_anggota: document.getElementById("gender").value,
-        level_anggota: document.getElementById("level").value,
-        alamat_anggota: document.getElementById("address").value,
-        username: user.username
-    };
-
-    try {
-        const response = await fetch(`${baseUrl}api/members/${user.id}`, {
-            method: "PUT",
-            headers: { 
-                "Authorization": `Bearer ${token}`, 
-                "Content-Type": "application/json" 
-            },
-            body: JSON.stringify(updatedData)
-        });
-
-        const responseData = await response.json();
-        console.log("Response Data:", responseData);
-
-        if (response.ok && responseData.success) {
-            alert("Profil berhasil diperbarui!");
-        } else {
-            throw new Error(responseData.message || "Unknown error occurred.");
-        }
-    } catch (error) {
-        console.error("Profile update error:", error);
-        alert(error.message);
-    }
-});
-
 </script>
 
 <?= $this->endSection() ?>
