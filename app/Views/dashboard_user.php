@@ -79,9 +79,8 @@
     }
 
     .filter-btn:hover {
-        background-color: #333;
-    }
-
+    background-color: #f97316;
+}
     /* 🔹 Book Grid */
     .book-grid {
         display: grid;
@@ -150,11 +149,12 @@
 </div>
 
 <script>
+    const baseURL = "<?= base_url() ?>"; // This gives you your base URL (e.g. "https://elibrary-jelambarbaru.my.id/")
 document.addEventListener("DOMContentLoaded", function () {
     const apiBaseUrl = "<?= base_url('api/books') ?>";
     const token = localStorage.getItem("token");
     if (!token) {
-        window.location.href = "<?= base_url('login_user') ?>";
+        window.location.href = "<?= base_url('login-user') ?>";
         return;
     }
 
@@ -269,12 +269,20 @@ document.addEventListener("DOMContentLoaded", function () {
                         <p class="text-sm text-gray-600 mb-4">${book.sinopsis || "No synopsis available"}</p>
                         <p class="text-xs text-gray-400 mb-2">ISBN: ${book.isbn || 'N/A'}</p>
                         <div class="flex gap-2">
-                            ${book.file_ebook_url ? 
-                                `<a href="${book.file_ebook_url}" target="_blank" class="inline-flex items-center bg-orange-500 text-white px-4 py-1 rounded-full text-sm shadow-md hover:bg-orange-600 transition-colors">
-                                    <span class="mr-1">📚</span> Baca E-Book
-                                </a>` : 
-                                ''
-                            }
+                        ${book.file_ebook_url ? 
+    (() => {
+        const urlParts = book.file_ebook_url.split('/');
+        const filename = urlParts[urlParts.length - 1];
+        return `<a href="${baseURL}pdf/viewIframe/${filename}" target="_blank" 
+            class="inline-flex items-center bg-orange-500 text-white px-4 py-1 rounded-full text-sm shadow-md hover:bg-orange-600 transition-colors">
+                <span class="mr-1">📚</span> Baca E-Book
+            </a>`;
+    })() : 
+    ''
+}
+
+
+
                             ${book.buku_fisik === "Y" ? 
                                 `<button class="inline-flex items-center bg-white border border-green-500 text-green-500 px-4 py-1 rounded-full text-sm shadow-md">
                                     <span class="mr-1">📖</span> Buku Fisik

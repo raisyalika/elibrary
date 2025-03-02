@@ -31,63 +31,90 @@
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const navLinks = document.getElementById("nav-links");
-      const token = localStorage.getItem("token");
-      const currentPath = window.location.pathname;
+document.addEventListener("DOMContentLoaded", function () {
+  const navLinks = document.getElementById("nav-links");
+  const token = localStorage.getItem("token");
+  const currentPath = window.location.pathname;
 
-      // Generate navigasi berdasarkan token
-      function generateNavLinks() {
-        if (token) {
-          return `
-            <a href="/beranda" class="nav-item flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100" data-path="/beranda">Beranda</a>
-            <a href="/buku" class="nav-item flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100" data-path="/buku">Buku</a>
-            <a href="/anggota" class="nav-item flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100" data-path="/anggota">Anggota</a>
-            <a href="#" onclick="logout()" class="flex items-center px-6 py-3 text-red-500 hover:bg-gray-100">Keluar</a>
-          `;
-        } else {
-          return `
-            <a href="login-admin" class="block px-4 py-2 text-sm font-medium text-gray-800 hover:text-gray-900">Login</a>
-            <a href="register" class="block px-4 py-2 text-sm font-medium text-gray-800 hover:text-gray-900">Daftar</a>
-          `;
-        }
-      }
-
-      navLinks.innerHTML = generateNavLinks();
-
-      // Set active link
-      function setActiveNavLink() {
-        document.querySelectorAll(".nav-item").forEach(link => {
-          if (currentPath === link.getAttribute("data-path")) {
-            link.classList.add("bg-gradient-to-b", "from-[#EC2C5A]", "to-[#FA7C54]", "text-white");
-          } else {
-            link.classList.remove("bg-gradient-to-b", "from-[#EC2C5A]", "to-[#FA7C54]", "text-white");
-          }
-        });
-      }
-      setActiveNavLink();
-
-      // Sidebar toggle functionality
-      const sidebar = document.getElementById("sidebar");
-      const openSidebar = document.getElementById("openSidebar");
-      const closeSidebar = document.getElementById("closeSidebar");
-
-      openSidebar.addEventListener("click", () => {
-        sidebar.classList.remove("-translate-x-full");
-        openSidebar.classList.add("hidden");
-      });
-
-      closeSidebar.addEventListener("click", () => {
-        sidebar.classList.add("-translate-x-full");
-        openSidebar.classList.remove("hidden");
-      });
-    });
-
-    function logout() {
-      localStorage.removeItem("token");
-      localStorage.removeItem("admin");
-      window.location.href = "<?= base_url('login-user') ?>";
+  // Function to decode JWT token
+  function parseJwt(token) {
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error("Invalid token:", error);
+      return null;
     }
+  }
+
+  if (token) {
+    const decodedToken = parseJwt(token);
+    if (!decodedToken || decodedToken.role !== "admin") {
+      window.location.href = "/login-user"; // Redirect if not admin
+    }
+  } else {
+    window.location.href = "/login-user"; // Redirect if token doesn't exist
+  }
+
+  // Generate navigasi berdasarkan token
+  function generateNavLinks() {
+    if (token) {
+      return `
+        <a href="/beranda" class="nav-item flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100" data-path="/beranda">Beranda</a>
+        <a href="/buku" class="nav-item flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100" data-path="/buku">Buku</a>
+        <a href="/anggota" class="nav-item flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100" data-path="/anggota">Anggota</a>
+        <a href="#" onclick="logout()" class="flex items-center px-6 py-3 text-red-500 hover:bg-gray-100">Keluar</a>
+      `;
+    } else {
+      return `
+        <a href="login-admin" class="block px-4 py-2 text-sm font-medium text-gray-800 hover:text-gray-900">Login</a>
+        <a href="register" class="block px-4 py-2 text-sm font-medium text-gray-800 hover:text-gray-900">Daftar</a>
+      `;
+    }
+  }
+
+  navLinks.innerHTML = generateNavLinks();
+
+  // Set active link
+  function setActiveNavLink() {
+    document.querySelectorAll(".nav-item").forEach((link) => {
+      if (currentPath === link.getAttribute("data-path")) {
+        link.classList.add("bg-gradient-to-b", "from-[#EC2C5A]", "to-[#FA7C54]", "text-white");
+      } else {
+        link.classList.remove("bg-gradient-to-b", "from-[#EC2C5A]", "to-[#FA7C54]", "text-white");
+      }
+    });
+  }
+  setActiveNavLink();
+
+  // Sidebar toggle functionality
+  const sidebar = document.getElementById("sidebar");
+  const openSidebar = document.getElementById("openSidebar");
+  const closeSidebar = document.getElementById("closeSidebar");
+
+  openSidebar.addEventListener("click", () => {
+    sidebar.classList.remove("-translate-x-full");
+    openSidebar.classList.add("hidden");
+  });
+
+  closeSidebar.addEventListener("click", () => {
+    sidebar.classList.add("-translate-x-full");
+    openSidebar.classList.remove("hidden");
+  });
+});
+
+function logout() {
+  localStorage.removeItem("token");
+  window.location.href = "/login-user";
+}
+
   </script>
 </body>
 </html>

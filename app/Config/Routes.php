@@ -21,6 +21,10 @@ $routes->get('buku/tambah_buku', 'Page::tambah_buku');
 $routes->get('buku/edit_buku', 'Page::edit_buku');
 $routes->get('anggota/tambah_anggota', "Page::tambah_anggota");
 $routes->get('anggota/edit_anggota', "Page::edit_anggota");
+$routes->get('pdf/viewIframe/(:any)', 'PdfController::viewIframe/$1');
+$routes->get('pdf/display/(:any)', 'PdfController::display/$1');
+
+
 
 // API
 $routes->get('/api','ApiController::index');

@@ -16,7 +16,6 @@ class BookModel extends Model
     
     protected $validationRules = [
         'judul' => 'required|min_length[3]',
-        'isbn' => 'required|min_length[10]',
         'pengarang' => 'required',
         'penerbit' => 'required'
     ];
