@@ -111,11 +111,10 @@
 <!-- 🔹 Search Bar -->
 <div class="search-container">
     <div class="search-box shadow-md">
-        <input type="text" id="search" placeholder="Cari buku...">
-        <button onclick="fetchBooks()">🔍</button>
+    <input type="text" id="search" placeholder="Cari buku..." oninput="fetchBooks()">
+        <button>🔍</button>
     </div>
 </div>
-
 <body>
 <div class="filter-section">
     <p class="filter-title">Filter Buku</p>
@@ -124,11 +123,13 @@
     <p class="text-sm font-semibold text-gray-700 mb-4">Kategori</p>
     <div class="filter-buttons kategori-filters">
         <button class="filter-btn active" data-kategori="">Semua Kategori</button>
-        <button class="filter-btn" data-kategori="Fiksi">Fiksi</button>
+        
         <button class="filter-btn" data-kategori="Non Fiksi">Non Fiksi</button>
         <button class="filter-btn" data-kategori="Sains">Sains</button>
         <button class="filter-btn" data-kategori="Komik">Komik</button>
         <button class="filter-btn" data-kategori="Novel">Novel</button>
+        <button class="filter-btn" data-kategori="Dongeng">Dongeng</button>
+        <button class="filter-btn" data-kategori="Pelajaran">Pelajaran</button>
     </div>
 
     <!-- 🔹 Level Filter -->
@@ -147,7 +148,6 @@
     <div class="loading-message">Loading books...</div>
 </div>
 </div>
-
 <script>
     const baseURL = "<?= base_url() ?>"; // This gives you your base URL (e.g. "https://elibrary-jelambarbaru.my.id/")
 document.addEventListener("DOMContentLoaded", function () {
@@ -328,14 +328,6 @@ document.addEventListener("DOMContentLoaded", function () {
             currentPage = 1; // Reset to first page when filtering
             fetchBooks();
         });
-    });
-
-    // Handle Search
-    searchInput.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
-            currentPage = 1; // Reset to first page when searching
-            fetchBooks();
-        }
     });
 
     fetchBooks();
