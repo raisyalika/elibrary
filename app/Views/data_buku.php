@@ -17,10 +17,22 @@
             </div>
         </div>
 
-        <!-- Search Bar -->
-        <div class="mb-6">
+        <!-- Search and Filter Section -->
+        <div class="mb-6 flex space-x-4">
             <input type="text" id="searchInput" placeholder="Search"
                 class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500">
+
+            <!-- Category Filter -->
+            <select id="categoryFilter" class="px-4 py-2 border border-gray-300 rounded-lg">
+                <option value="">Semua Kategori</option>
+                <option value="Non Fiksi">Non Fiksi</option>
+                <option value="Sains">Sains</option>
+                <option value="Komik">Komik</option>
+                <option value="Novel">Novel</option>
+                <option value="Dongeng">Dongeng</option>
+                <option value="Pelajaran">Pelajaran</option>
+                <option value="Lainnya">Lainnya</option>
+            </select>
         </div>
 
         <!-- Table Container -->
@@ -46,9 +58,7 @@
 
         <!-- Pagination -->
         <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-            <div class="text-sm text-gray-700">
-                Showing <span id="startRange">1</span> to <span id="endRange">10</span> of <span id="totalEntries">100</span> Entries
-            </div>
+           
             <div class="flex space-x-2">
                 <button class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600" id="prevBtn">Prev</button>
                 <button class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600" id="nextBtn">Next</button>
@@ -59,12 +69,12 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    const apiBaseUrl = "https://elibrary-jelambarbaru.my.id/api/books"// ✅ Directly use base_url for API calls
     let token = localStorage.getItem("token");
 
     if (token) fetchBooks(1);
 
     document.getElementById("searchInput").addEventListener("input", () => fetchBooks(1));
+    document.getElementById("categoryFilter").addEventListener("change", () => fetchBooks(1));
     document.getElementById("prevBtn").addEventListener("click", () => changePage(-1));
     document.getElementById("nextBtn").addEventListener("click", () => changePage(1));
 });
@@ -74,10 +84,13 @@ let totalEntries = 0;
 let perPage = 10;
 
 async function fetchBooks(page = 1) {
-    const apiBaseUrl = "<?= base_url('api/books') ?>";
+    const apiBaseUrl = "https://elibrary-jelambarbaru.my.id/api/books";
     const searchQuery = document.getElementById("searchInput").value.trim();
+    const selectedCategory = document.getElementById("categoryFilter").value;
+    
     let queryParams = [`page=${page}`, `per_page=${perPage}`];
     if (searchQuery) queryParams.push(`search=${encodeURIComponent(searchQuery)}`);
+    if (selectedCategory) queryParams.push(`kategori=${encodeURIComponent(selectedCategory)}`);
 
     try {
         const response = await fetch(`${apiBaseUrl}?${queryParams.join("&")}`, {
@@ -98,6 +111,40 @@ async function fetchBooks(page = 1) {
     } catch (error) {
         console.error("Error fetching books:", error);
     }
+}
+
+
+function updatePagination() {
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    
+    // Calculate total pages
+    const totalPages = Math.ceil(totalEntries / perPage);
+    
+    // Disable/enable prev button
+    prevBtn.disabled = currentPage <= 1;
+    prevBtn.classList.toggle("opacity-50", currentPage <= 1);
+    
+    // Disable/enable next button
+    nextBtn.disabled = currentPage >= totalPages;
+    nextBtn.classList.toggle("opacity-50", currentPage >= totalPages);
+    
+    // Add page indicator
+    const paginationInfo = document.createElement("div");
+    paginationInfo.className = "text-sm text-gray-700";
+    paginationInfo.innerHTML = `Page ${currentPage} of ${totalPages} (${totalEntries} total entries)`;
+    
+    // Find pagination container and update it
+    const paginationContainer = document.querySelector(".bg-white.px-4.py-3.flex");
+    
+    // Remove existing page info if any
+    const existingInfo = paginationContainer.querySelector(".text-sm.text-gray-700");
+    if (existingInfo) {
+        existingInfo.remove();
+    }
+    
+    // Insert between flex container start and buttons
+    paginationContainer.insertBefore(paginationInfo, document.getElementById("prevBtn").parentNode);
 }
 
 function renderTable(data) {
