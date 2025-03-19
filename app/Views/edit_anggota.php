@@ -20,7 +20,7 @@
                     <!-- Profile Photo -->
                     <div class="flex justify-center">
                         <div class="relative">
-                            <img id="memberPhoto" src="/api/placeholder/120/120" alt="Member photo" class="w-32 h-32 rounded-full object-cover">
+                            <img id="memberPhoto" src="<?= base_url('assets/img/Default.jpg') ?>"  class="w-32 h-32 rounded-full object-cover">
                         </div>
                     </div>
 
@@ -194,16 +194,14 @@ async function fetchMemberData(memberId, token) {
         alert("❌ Gagal mengambil data anggota. Silakan coba lagi.");
     }
 }
-
 async function fetchProfilePicture(memberId, token) {
     const imgElement = document.getElementById('memberPhoto');
-    
-    // Change the placeholder URL to a default image in your assets
-    const placeholderImage = `${baseURL}assets/img/default-profile.png`;
-    
+    const defaultImage = `${baseURL}assets/img/Default.jpg`; // ✅ Match your base URL
+
     imgElement.onerror = function() {
-        this.src = placeholderImage;
-        this.onerror = null;
+        console.warn("⚠️ Image failed to load, switching to default");
+        this.src = defaultImage;
+        this.onerror = null; // prevent infinite loop
     };
 
     try {
@@ -214,22 +212,21 @@ async function fetchProfilePicture(memberId, token) {
             }
         });
 
-        if (!response.ok) {
-            throw new Error(`Failed to fetch profile picture: ${response.status}`);
-        }
-
         const result = await response.json();
 
-        if (result.foto_url) {
+        if (result.foto_url && result.foto_url.trim() !== "") {
+            console.log("✅ Fetched profile picture URL:", result.foto_url);
             imgElement.src = result.foto_url;
         } else {
-            imgElement.src = placeholderImage;
+            console.warn("⚠️ No foto_url in response, reverting to default image");
+            imgElement.src = defaultImage;
         }
     } catch (error) {
-        console.error("🚨 Error with profile picture:", error);
-        imgElement.src = placeholderImage;
+        console.error("🚨 Error fetching profile picture:", error);
+        imgElement.src = defaultImage;
     }
 }
+
 function handleProfilePictureUpload(memberId, token) {
     const input = document.createElement('input');
     input.type = 'file';
@@ -275,7 +272,6 @@ function handleProfilePictureUpload(memberId, token) {
 
     input.click();
 }
-// Update the populateForm function to handle images better
 function populateForm(data) {
     console.log("🔄 Populating form with data:", data);
 
@@ -287,56 +283,16 @@ function populateForm(data) {
     document.getElementById('memberLevel').value = data.level_anggota;
     document.getElementById('memberAddress').value = data.alamat_anggota;
 
-    // Handle profile picture
+    // Handle profile picture with null/empty check
     const imgElement = document.getElementById('memberPhoto');
-    if (data.foto_url) {
-        const tempImg = new Image();
-        tempImg.onload = function() {
-            imgElement.src = data.foto_url;
-        };
-        tempImg.onerror = function() {
-            imgElement.src = '/api/placeholder/120/120';
-        };
-        tempImg.src = data.foto_url;
+    const defaultImage = `${baseURL}assets/img/Default.jpg`; // ✅ Set your default path here!
+
+    if (data.foto_url && data.foto_url.trim() !== "") {
+        console.log("✅ Valid foto_url found:", data.foto_url);
+        imgElement.src = data.foto_url;
     } else {
-        imgElement.src = '/api/placeholder/120/120';
-    }
-}
-async function updateMember(event, memberId, token) {
-    event.preventDefault();
-    
-    const memberData = {
-        id_anggota: document.getElementById('memberId').value.trim(),
-        nama_anggota: document.getElementById('memberName').value.trim(),
-        username: document.getElementById('username').value.trim(),
-        password: document.getElementById('memberPassword').value.trim(),
-        jk_anggota: document.querySelector('input[name="gender"]:checked').value.trim(),
-        level_anggota: document.getElementById('memberLevel').value.trim(),
-        alamat_anggota: document.getElementById('memberAddress').value.trim()
-    };
-
-    try {
-        const response = await fetch(`${baseURL}api/members/${memberId}`, { // ✅ Changed localhost to baseURL
-            method: "PUT",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(memberData)
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            alert("✅ Member berhasil diperbarui!");
-            document.getElementById('editMemberForm').reset();
-            window.location.href = "<?= base_url('/anggota') ?>";
-        } else {
-            alert(`❌ Gagal mengupdate member: ${JSON.stringify(result)}`);
-        }
-    } catch (error) {
-        console.error("🚨 Error updating member:", error);
-        alert("❌ Gagal mengupdate member. Silakan coba lagi.");
+        console.warn("⚠️ No foto_url found, using default image");
+        imgElement.src = defaultImage;
     }
 }
 

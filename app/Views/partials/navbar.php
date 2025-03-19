@@ -58,8 +58,8 @@
     function generateNavLinks() {
         if (token) {
             return `
-                <a href="<?= base_url('profile') ?>" class="hover:underline">Profil</a>
-                <a href="#" id="logoutButton" class="hover:underline">Keluar</a>
+                <a href="<?= base_url('profile') ?>" class="hover:underline self-center px-4 py-2 font-medium">Profil</a>
+                <a href="#" id="logoutButton"  class="bg-gradient-to-b from-[#FA7C54] to-[#EC2C5A] text-white  px-4 py-2 rounded-lg items-center">Keluar</a>
             `;
         } else {
             return `

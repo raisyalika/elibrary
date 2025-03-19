@@ -84,7 +84,7 @@ let totalEntries = 0;
 let perPage = 10;
 
 async function fetchBooks(page = 1) {
-    const apiBaseUrl = "https://elibrary-jelambarbaru.my.id/api/books";
+    const apiBaseUrl = "http://localhost:8080/api/books";
     const searchQuery = document.getElementById("searchInput").value.trim();
     const selectedCategory = document.getElementById("categoryFilter").value;
     
@@ -112,7 +112,6 @@ async function fetchBooks(page = 1) {
         console.error("Error fetching books:", error);
     }
 }
-
 
 function updatePagination() {
     const prevBtn = document.getElementById("prevBtn");
@@ -176,6 +175,33 @@ function renderTable(data) {
         `;
         tableBody.appendChild(row);
     });
+}
+
+async function deleteBook(bookId) {
+    const apiBaseUrl = "http://localhost:8080/api/books";
+    const token = localStorage.getItem("token");
+
+    if (!confirm("Apakah Anda yakin ingin menghapus buku ini?")) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${apiBaseUrl}/${bookId}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+        alert("✅ Buku berhasil dihapus!");
+        fetchBooks(currentPage);
+    } catch (error) {
+        console.error("Error deleting book:", error);
+        alert("❌ Terjadi kesalahan saat menghapus buku.");
+    }
 }
 </script>
 
