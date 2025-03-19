@@ -81,7 +81,7 @@
     let perPage = 10;
 
     async function fetchAnggota(page = 1) {
-        const apiBaseUrl = "https://elibrary-jelambarbaru.my.id/api/members";
+        const apiBaseUrl = "http://localhost:8080/api/members";
         const searchQuery = document.getElementById("searchInput").value.trim();
         const selectedLevel = document.getElementById("levelFilter").value;
 
@@ -137,40 +137,67 @@
     }
 
     function updatePagination() {
-    const prevBtn = document.getElementById("prevBtn");
-    const nextBtn = document.getElementById("nextBtn");
-    
-    // Calculate total pages
-    const totalPages = Math.ceil(totalEntries / perPage);
-    
-    // Disable/enable prev button
-    prevBtn.disabled = currentPage <= 1;
-    prevBtn.classList.toggle("opacity-50", currentPage <= 1);
-    
-    // Disable/enable next button
-    nextBtn.disabled = currentPage >= totalPages;
-    nextBtn.classList.toggle("opacity-50", currentPage >= totalPages);
-    
-    // Add page indicator
-    const paginationInfo = document.createElement("div");
-    paginationInfo.className = "text-sm text-gray-700";
-    paginationInfo.innerHTML = `Page ${currentPage} of ${totalPages} (${totalEntries} total entries)`;
-    
-    // Find pagination container and update it
-    const paginationContainer = document.querySelector(".bg-white.px-4.py-3.flex");
-    
-    // Remove existing page info if any
-    const existingInfo = paginationContainer.querySelector(".text-sm.text-gray-700");
-    if (existingInfo) {
-        existingInfo.remove();
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+        
+        // Calculate total pages
+        const totalPages = Math.ceil(totalEntries / perPage);
+        
+        // Disable/enable prev button
+        prevBtn.disabled = currentPage <= 1;
+        prevBtn.classList.toggle("opacity-50", currentPage <= 1);
+        
+        // Disable/enable next button
+        nextBtn.disabled = currentPage >= totalPages;
+        nextBtn.classList.toggle("opacity-50", currentPage >= totalPages);
+        
+        // Add page indicator
+        const paginationInfo = document.createElement("div");
+        paginationInfo.className = "text-sm text-gray-700";
+        paginationInfo.innerHTML = `Page ${currentPage} of ${totalPages} (${totalEntries} total entries)`;
+        
+        // Find pagination container and update it
+        const paginationContainer = document.querySelector(".bg-white.px-4.py-3.flex");
+        
+        // Remove existing page info if any
+        const existingInfo = paginationContainer.querySelector(".text-sm.text-gray-700");
+        if (existingInfo) {
+            existingInfo.remove();
+        }
+        
+        // Insert between flex container start and buttons
+        paginationContainer.insertBefore(paginationInfo, document.getElementById("prevBtn").parentNode);
     }
-    
-    // Insert between flex container start and buttons
-    paginationContainer.insertBefore(paginationInfo, document.getElementById("prevBtn").parentNode);
-}
 
     function changePage(step) {
         fetchAnggota(currentPage + step);
+    }
+
+    async function deleteAnggota(memberId) {
+        const apiBaseUrl = "http://localhost:8080/api/members";
+        const token = localStorage.getItem("token");
+
+        if (!confirm("Apakah Anda yakin ingin menghapus anggota ini?")) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${apiBaseUrl}/${memberId}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+            alert("✅ Anggota berhasil dihapus!");
+            fetchAnggota(currentPage);
+        } catch (error) {
+            console.error("Error deleting member:", error);
+            alert("❌ Terjadi kesalahan saat menghapus anggota.");
+        }
     }
     </script>
 

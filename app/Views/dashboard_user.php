@@ -149,7 +149,7 @@
 </div>
 </div>
 <script>
-    const baseURL = "<?= base_url() ?>"; // This gives you your base URL (e.g. "https://elibrary-jelambarbaru.my.id/")
+    const baseURL = "<?= base_url() ?>"; 
 document.addEventListener("DOMContentLoaded", function () {
     const apiBaseUrl = "<?= base_url('api/books') ?>";
     const token = localStorage.getItem("token");
@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
    window.fetchBooks = function () {
     let searchQuery = searchInput.value.trim();
-    let url = "https://elibrary-jelambarbaru.my.id/api/books";
+    let url = "http://localhost:8080/api/books";
 
     // Add query parameters
     const params = new URLSearchParams();

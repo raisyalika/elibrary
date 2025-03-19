@@ -14,12 +14,12 @@
                 <!-- Profile Photo Upload -->
                 <div class="flex flex-col items-center">
                     <div class="relative">
-                        <img id="profilePicturePreview" src="<?= base_url('assets/img/profile.jpg') ?>" class="w-32 h-32 rounded-full object-cover mb-4 border border-gray-300 shadow-md">
+                        <img id="profilePicturePreview" src="<?= base_url('assets/img/Default.jpg') ?>" class="w-32 h-32 rounded-full object-cover mb-4 border border-gray-300 shadow-md">
                     </div>
                     <input type="file" id="profilePicture" accept="image/*" class="hidden">
-                    <button type="button" id="uploadPictureBtn" class="bg-orange-500 text-white px-4 py-2 rounded-lg shadow-md mt-2">
-                        Pilih Foto Profil
-                    </button>
+                    <button type="button" id="uploadPictureBtn" class="bg-gradient-to-b from-[#FA7C54] to-[#EC2C5A] text-white px-4 py-2 rounded-lg shadow-md mt-2">
+    Pilih Foto Profil
+</button>
                 </div>
 
                 <!-- Form Fields -->
