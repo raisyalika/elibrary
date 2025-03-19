@@ -20,7 +20,7 @@
                         class="w-32 h-32 rounded-full object-cover mb-4 border border-gray-300 shadow-md">
                     
                     <!-- Edit Profile Picture Button -->
-                    <button id="uploadPictureBtn" 
+                    <button type="button" id="uploadPictureBtn" 
                             class="absolute bottom-4 right-0 bg-orange-500 text-white p-2 rounded-full hover:bg-orange-600 shadow-lg">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -38,11 +38,8 @@
                 </div>
 
                 <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                    <div class="flex items-center space-x-2">
-                        <input type="password" id="password" class="block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-100" readonly>
-                      
-                    </div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="username" class="block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-100" readonly>
                 </div>
 
                 <div>
@@ -89,7 +86,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const data = await response.json();
 
         document.getElementById("fullName").value = data.nama_anggota;
-        document.getElementById("password").value = "********";
+        document.getElementById("username").value = data.username || data.email || ""; // Assuming username or email exists in the response
         document.getElementById("gender").value = data.jk_anggota;
         document.getElementById("level").value = data.level_anggota;
         document.getElementById("address").value = data.alamat_anggota;
@@ -104,27 +101,22 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 });
 
-// Toggle Password Visibility with Orange Button
-document.getElementById("togglePassword").addEventListener("click", function () {
-    const passwordField = document.getElementById("password");
-    if (passwordField.type === "password") {
-        passwordField.type = "text";
-        this.textContent = "Hide";
-    } else {
-        passwordField.type = "password";
-        this.textContent = "Show";
-    }
-});
-
 // Handle Profile Picture Upload
-document.getElementById("uploadPictureBtn").addEventListener("click", function () {
+document.getElementById("uploadPictureBtn").addEventListener("click", function(e) {
+    e.preventDefault(); // Prevent any default behavior
+    e.stopPropagation(); // Stop event bubbling
+    
+    console.log("Upload button clicked"); // Debug logging
+    
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
 
-    input.onchange = async function (event) {
+    input.onchange = async function(event) {
         const file = event.target.files[0];
         if (!file) return;
+        
+        console.log("File selected:", file.name); // Debug logging
 
         const formData = new FormData();
         formData.append("profilePicture", file);
@@ -134,12 +126,19 @@ document.getElementById("uploadPictureBtn").addEventListener("click", function (
         const apiUrl = `${baseUrl}api/members/${user.id}/upload-profile-picture`;
 
         try {
+            console.log("Sending request to:", apiUrl); // Debug logging
+            
             const response = await fetch(apiUrl, {
                 method: "POST",
-                headers: { "Authorization": `Bearer ${token}` },
+                headers: { 
+                    "Authorization": `Bearer ${token}`
+                    // Don't set Content-Type when sending FormData
+                },
                 body: formData
             });
 
+            console.log("Response status:", response.status); // Debug logging
+            
             const data = await response.json();
             console.log("Upload Response:", data);
 
@@ -147,16 +146,17 @@ document.getElementById("uploadPictureBtn").addEventListener("click", function (
                 throw new Error(data.message || "Upload failed.");
             }
 
-            // ✅ Update profile picture preview
-            document.getElementById("profilePicture").src = data.foto_url;
+            // Update profile picture preview
+            document.getElementById("profilePicture").src = data.foto_url + "?t=" + new Date().getTime(); // Add timestamp to prevent caching
             alert("Profile picture uploaded successfully!");
 
         } catch (error) {
             console.error("Upload error:", error);
-            alert(error.message);
+            alert("Error uploading profile picture: " + error.message);
         }
     };
 
+    // Trigger file dialog
     input.click();
 });
 </script>

@@ -52,6 +52,7 @@
                     <select required id="kategori" class="w-full p-2 border rounded-md">
                         <option value="non_fiksi">Non Fiksi</option>
                         <option value="dongeng">Dongeng</option>
+                        <option value="dongeng">Pelajaran</option>
                         <option value="sains">Sains</option>
                         <option value="komik">Komik</option>
                         <option value="Novel">Novel</option>

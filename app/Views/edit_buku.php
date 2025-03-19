@@ -58,12 +58,16 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Kategori*</label>
                     <div class="space-y-2">
                         <label class="inline-flex items-center">
-                            <input type="radio" name="category" value="non_fiksi" class="text-red-500 focus:ring-red-500">
+                            <input type="radio" name="category" value="non fiksi" class="text-red-500 focus:ring-red-500">
                             <span class="ml-2">Non Fiksi</span>
                         </label>
                         <label class="inline-flex items-center ml-6">
                             <input type="radio" name="category" value="dongeng" class="text-red-500 focus:ring-red-500">
                             <span class="ml-2">Dongeng</span>
+                        </label>
+                        <label class="inline-flex items-center ml-6">
+                            <input type="radio" name="category" value="pelajaran" class="text-red-500 focus:ring-red-500">
+                            <span class="ml-2">Pelajaran</span>
                         </label>
                         <label class="inline-flex items-center ml-6">
                             <input type="radio" name="category" value="sains" class="text-red-500 focus:ring-red-500">
