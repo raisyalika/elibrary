@@ -224,29 +224,41 @@ class BookController extends ResourceController
     }
 
     public function printPDF()
-    {
-        $bookModel = new \App\Models\BookModel();
-    
-        $books = $bookModel->findAll();
-    
-        $categoryData = $bookModel
-            ->select('kategori, COUNT(*) AS total')
-            ->groupBy('kategori')
-            ->findAll();
-    
-        $html = view('buku_pdf', [
-            'books'         => $books,
-            'categoryData'  => $categoryData,
-        ]);
-    
-        $options = new Options();
-        $options->set('isRemoteEnabled', true); 
-    
-        $dompdf = new Dompdf($options);
-        $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'landscape');
-        $dompdf->render();
-        $dompdf->stream("laporan_buku.pdf", ["Attachment" => false]);
+{
+    $bookModel = new \App\Models\BookModel();
+
+    $books = $bookModel->findAll();
+
+    $categoryData = $bookModel
+        ->select('kategori, COUNT(*) AS total')
+        ->groupBy('kategori')
+        ->findAll();
+
+    $html = view('buku_pdf', [
+        'books' => $books,
+        'categoryData' => $categoryData,
+    ]);
+
+    $options = new \Dompdf\Options();
+    $options->set('isRemoteEnabled', true);
+
+    $dompdf = new \Dompdf\Dompdf($options);
+    $dompdf->loadHtml($html);
+    $dompdf->setPaper('A4', 'landscape');
+    $dompdf->render();
+
+    // 👇👇👇 CRUCIAL: Clear output buffer to avoid corrupting the PDF
+    if (ob_get_length()) {
+        ob_end_clean();
     }
-    
+
+    // 👇 Optional but good practice: Set headers explicitly
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: inline; filename="laporan_buku.pdf"');
+    header('Content-Length: ' . strlen($dompdf->output()));
+
+    echo $dompdf->output();
+    exit;
+}
+
 }
