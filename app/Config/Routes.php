@@ -9,6 +9,7 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Page::login_user');
 
 $routes->get('login-admin', 'Page::login');
+$routes->get('login', 'Page::login_user');
 $routes->get('login-user', 'Page::login_user');
 $routes->get('register', 'Page::register');
 $routes->get('dashboard_user', "Page::dashboard_user");
@@ -23,7 +24,7 @@ $routes->get('anggota/tambah_anggota', "Page::tambah_anggota");
 $routes->get('anggota/edit_anggota', "Page::edit_anggota");
 $routes->get('pdf/viewIframe/(:any)', 'PdfController::viewIframe/$1');
 $routes->get('pdf/display/(:any)', 'PdfController::display/$1');
-
+$routes->get('buku/printPDF', 'BookController::printPDF');
 
 
 // API
@@ -54,7 +55,7 @@ $routes->group('api', ['namespace' => 'App\Controllers'], function ($routes) {
             $routes->delete('(:num)', 'BookController::delete/$1');
             $routes->post('(:num)/upload-cover', 'BookController::uploadCover/$1');
             $routes->post('(:num)/upload-pdf', 'BookController::uploadPDF/$1');
-            $routes->get('buku/printPDF', 'BookController::printPDF');
+           
         });
 
         $routes->group('members', function ($routes) {

@@ -21,7 +21,8 @@ class BookModel extends Model
         'buku_fisik',
         'file_ebook_url',
         'sampul_url',
-        'sinopsis'
+        'sinopsis',
+        'updated_by', 
     ];
 
     protected $validationRules = [

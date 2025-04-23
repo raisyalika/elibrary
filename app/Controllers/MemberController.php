@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use CodeIgniter\RESTful\ResourceController;
 use App\Models\MemberModel;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 class MemberController extends ResourceController
 {
@@ -12,6 +14,19 @@ class MemberController extends ResourceController
     public function __construct()
     {
         $this->memberModel = new MemberModel();
+    }
+
+    protected function getUserIdFromToken()
+    {
+        $authHeader = $this->request->getHeaderLine('Authorization');
+        if (! $authHeader || ! preg_match('/Bearer\s(\S+)/', $authHeader, $m)) {
+            return null;
+        }
+
+        $jwt  = $m[1];
+        $key  = getenv('JWT_SECRET');
+        $data = JWT::decode($jwt, new Key($key, 'HS256'));
+        return $data->sub ?? null;
     }
 
     public function uploadProfilePicture($id)
@@ -148,13 +163,16 @@ class MemberController extends ResourceController
             'jk_anggota' => $this->request->getVar('jk_anggota'),
             'level_anggota' => $this->request->getVar('level_anggota'),
             'alamat_anggota' => $this->request->getVar('alamat_anggota'),
-            'foto_url' => null // No image storage initially
+            'foto_url' => null,
+            'updated_by'    => $this->getUserIdFromToken(), 
         ];
     
         $id = $this->memberModel->insert($data);
         if (!$id) {
             return $this->fail($this->memberModel->errors());
         }
+
+        
     
         // Retrieve the newly created record
         $newMember = $this->memberModel->find($id);
@@ -230,6 +248,8 @@ class MemberController extends ResourceController
     
         // ✅ Update Member Data
         try {
+            $data['updated_by'] = $this->getUserIdFromToken();
+           
             $updated = $this->memberModel->update($id, $data);
             if ($updated) {
                 return $this->respond([

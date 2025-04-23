@@ -6,6 +6,8 @@ use CodeIgniter\RESTful\ResourceController;
 use App\Models\BookModel;
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 class BookController extends ResourceController
 {
@@ -69,6 +71,18 @@ class BookController extends ResourceController
         $book = $this->bookModel->find($id);
         return $book ? $this->respond($book) : $this->failNotFound('Book not found');
     }
+    protected function getUserIdFromToken()
+    {
+        $authHeader = $this->request->getHeaderLine('Authorization');
+        if (! $authHeader || ! preg_match('/Bearer\s(\S+)/', $authHeader, $m)) {
+            return null;
+        }
+
+        $jwt  = $m[1];
+        $key  = getenv('JWT_SECRET');
+        $data = JWT::decode($jwt, new Key($key, 'HS256'));
+        return $data->sub ?? null;
+    }
 
     // 🆕 Create a Book
     public function create()
@@ -79,6 +93,8 @@ class BookController extends ResourceController
         if (json_last_error() !== JSON_ERROR_NONE) {
             return $this->fail('Invalid JSON format: ' . json_last_error_msg());
         }
+        $data['created_by'] = $this->getUserIdFromToken();
+        $data['updated_by'] = $this->getUserIdFromToken();
 
         // Validation Rules
         $rules = [
@@ -186,6 +202,8 @@ class BookController extends ResourceController
         if (!$this->bookModel->find($id)) {
             return $this->failNotFound('Book not found');
         }
+       
+        $data['updated_by'] = $this->getUserIdFromToken();
 
         if (!$this->bookModel->update($id, $data)) {
             return $this->fail($this->bookModel->errors());
@@ -208,19 +226,27 @@ class BookController extends ResourceController
     public function printPDF()
     {
         $bookModel = new \App\Models\BookModel();
+    
         $books = $bookModel->findAll();
-
-        // Load view to string
-        $html = view('buku_pdf', ['books' => $books]);
-
-        // Dompdf setup
+    
+        $categoryData = $bookModel
+            ->select('kategori, COUNT(*) AS total')
+            ->groupBy('kategori')
+            ->findAll();
+    
+        $html = view('buku_pdf', [
+            'books'         => $books,
+            'categoryData'  => $categoryData,
+        ]);
+    
         $options = new Options();
-        $options->set('isRemoteEnabled', true);
-
+        $options->set('isRemoteEnabled', true); 
+    
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
-        $dompdf->stream("data_buku.pdf", ["Attachment" => false]);
+        $dompdf->stream("laporan_buku.pdf", ["Attachment" => false]);
     }
+    
 }

@@ -26,7 +26,7 @@ class Database extends Config
      */
     public array $default = [
         'DSN'          => '',
-        'hostname'     => 'localhost:3306',
+        'hostname'     => 'localhost:3307',
         'username'     => 'root',
         'password'     => '',
         'database'     => 'elibrary_sdnjb',
@@ -41,7 +41,7 @@ class Database extends Config
         'compress'     => false,
         'strictOn'     => false,
         'failover'     => [],
-        'port'         => 3306,
+        'port'         => 3307,
         'numberNative' => false,
         'foundRows'    => false,
         'dateFormat'   => [

@@ -7,10 +7,11 @@
         <div class="flex justify-between items-center mb-8 p-4 rounded-lg">
             <h1 class="text-2xl font-bold bg-gradient-to-b from-[#EC2C5A] to-[#FA7C54] bg-clip-text text-transparent">Buku</h1>
             <div class="flex items-center space-x-4">
-                <a href="<?= base_url('buku/printPDF') . '?' . http_build_query([
-                                'kategori' => $_GET['kategori'] ?? '',
-                                'search' => $_GET['search'] ?? ''
-                            ]) ?>" class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg flex items-center hover:bg-gray-200">
+            <a
+  href="<?= base_url('buku/printPDF') ?>?<?= http_build_query([
+    'kategori'=>$_GET['kategori'] ?? '',
+    'search'=>$_GET['search'] ?? ''
+  ]) ?>" class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg flex items-center hover:bg-gray-200">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                     </svg>
