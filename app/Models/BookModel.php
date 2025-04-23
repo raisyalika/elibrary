@@ -9,11 +9,21 @@ class BookModel extends Model
     protected $table = 'buku';
     protected $primaryKey = 'id_buku';
     protected $allowedFields = [
-        'judul', 'isbn', 'pengarang', 'penerbit', 'tahun',
-        'kategori', 'level','tgl_pengadaan', 'ebook', 'buku_fisik',
-        'file_ebook_url', 'sampul_url', 'sinopsis'
+        'judul',
+        'isbn',
+        'pengarang',
+        'penerbit',
+        'tahun',
+        'kategori',
+        'level',
+        'tgl_pengadaan',
+        'ebook',
+        'buku_fisik',
+        'file_ebook_url',
+        'sampul_url',
+        'sinopsis'
     ];
-    
+
     protected $validationRules = [
         'judul' => 'required|min_length[3]',
         'pengarang' => 'required',
