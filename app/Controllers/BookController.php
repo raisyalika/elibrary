@@ -211,7 +211,7 @@ class BookController extends ResourceController
         $books = $bookModel->findAll();
 
         // Load view to string
-        $html = view('buku/pdf_template', ['books' => $books]);
+        $html = view('buku_pdf', ['books' => $books]);
 
         // Dompdf setup
         $options = new Options();

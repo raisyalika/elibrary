@@ -26,7 +26,8 @@
         padding: 10px;
         border: none;
         outline: none;
-        min-width: 0; /* Ensure input doesn't shrink */
+        min-width: 0;
+        /* Ensure input doesn't shrink */
     }
 
     .search-box button {
@@ -35,7 +36,8 @@
         border: none;
         cursor: pointer;
         color: white;
-        flex-shrink: 0; /* Prevent button from shrinking */
+        flex-shrink: 0;
+        /* Prevent button from shrinking */
     }
 
     /* 🔹 Filter Buttons */
@@ -79,8 +81,9 @@
     }
 
     .filter-btn:hover {
-    background-color: #f97316;
-}
+        background-color: #f97316;
+    }
+
     /* 🔹 Book Grid */
     .book-grid {
         display: grid;
@@ -97,175 +100,180 @@
 </style>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Dashboard</title>
-  <link href="<?= base_url('css/style.css') ?>" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link href="<?= base_url('css/style.css') ?>" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body>
-    
+
 </body>
+
 </html>
 <!-- 🔹 Search Bar -->
 <div class="search-container">
     <div class="search-box shadow-md">
-    <input type="text" id="search" placeholder="Cari buku..." oninput="fetchBooks()">
+        <input type="text" id="search" placeholder="Cari buku..." oninput="fetchBooks()">
         <button>🔍</button>
     </div>
 </div>
+
 <body>
-<div class="filter-section">
-    <p class="filter-title">Filter Buku</p>
+    <div class="filter-section">
+        <p class="filter-title">Filter Buku</p>
 
-    <!-- 🔹 Kategori Filter -->
-    <p class="text-sm font-semibold text-gray-700 mb-4">Kategori</p>
-    <div class="filter-buttons kategori-filters">
-        <button class="filter-btn active" data-kategori="">Semua Kategori</button>
-        
-        <button class="filter-btn" data-kategori="Non Fiksi">Non Fiksi</button>
-        <button class="filter-btn" data-kategori="Sains">Sains</button>
-        <button class="filter-btn" data-kategori="Komik">Komik</button>
-        <button class="filter-btn" data-kategori="Novel">Novel</button>
-        <button class="filter-btn" data-kategori="Dongeng">Dongeng</button>
-        <button class="filter-btn" data-kategori="Pelajaran">Pelajaran</button>
+        <!-- 🔹 Kategori Filter -->
+        <p class="text-sm font-semibold text-gray-700 mb-4">Kategori</p>
+        <div class="filter-buttons kategori-filters">
+            <button class="filter-btn active" data-kategori="">Semua Kategori</button>
+
+            <button class="filter-btn" data-kategori="Non Fiksi">Non Fiksi</button>
+            <button class="filter-btn" data-kategori="Sains">Sains</button>
+            <button class="filter-btn" data-kategori="Komik">Komik</button>
+            <button class="filter-btn" data-kategori="Novel">Novel</button>
+            <button class="filter-btn" data-kategori="Dongeng">Dongeng</button>
+            <button class="filter-btn" data-kategori="Pelajaran">Pelajaran</button>
+        </div>
+
+        <!-- 🔹 Level Filter -->
+        <p class="text-sm font-semibold text-gray-700 mt-4 mb-4">Level</p>
+        <div class="filter-buttons level-filters mb-4">
+            <button class="filter-btn active" data-level="">Semua Level</button>
+            <button class="filter-btn" data-level="Kelas 1">Kelas 1</button>
+            <button class="filter-btn" data-level="Kelas 2">Kelas 2</button>
+            <button class="filter-btn" data-level="Kelas 3">Kelas 3</button>
+            <button class="filter-btn" data-level="Kelas 4">Kelas 4</button>
+            <button class="filter-btn" data-level="Kelas 5">Kelas 5</button>
+            <button class="filter-btn" data-level="Kelas 6">Kelas 6</button>
+        </div>
+        <!-- 🔹 Books Container -->
+        <div id="bookContainer" class="flex flex-col gap-6 px-4 py-6 ">
+            <div class="loading-message">Loading books...</div>
+        </div>
     </div>
-
-    <!-- 🔹 Level Filter -->
-    <p class="text-sm font-semibold text-gray-700 mt-4 mb-4">Level</p>
-    <div class="filter-buttons level-filters mb-4">
-        <button class="filter-btn active" data-level="">Semua Level</button>
-        <button class="filter-btn" data-level="Kelas 1">Kelas 1</button>
-        <button class="filter-btn" data-level="Kelas 2">Kelas 2</button>
-        <button class="filter-btn" data-level="Kelas 3">Kelas 3</button>
-        <button class="filter-btn" data-level="Kelas 4">Kelas 4</button>
-        <button class="filter-btn" data-level="Kelas 5">Kelas 5</button>
-        <button class="filter-btn" data-level="Kelas 6">Kelas 6</button>
-    </div>
-    <!-- 🔹 Books Container -->
-<div id="bookContainer" class="flex flex-col gap-6 px-4 py-6 ">
-    <div class="loading-message">Loading books...</div>
-</div>
-</div>
-<script>
-    const baseURL = "<?= base_url() ?>"; 
-document.addEventListener("DOMContentLoaded", function () {
-    const apiBaseUrl = "<?= base_url('api/books') ?>";
-    const token = localStorage.getItem("token");
-    if (!token) {
-        window.location.href = "<?= base_url('login-user') ?>";
-        return;
-    }
-
-    const bookContainer = document.getElementById("bookContainer");
-    const kategoriButtons = document.querySelectorAll(".kategori-filters .filter-btn");
-    const levelButtons = document.querySelectorAll(".level-filters .filter-btn");
-    const searchInput = document.getElementById("search");
-
-    let currentKategori = "";
-    let currentLevel = "";
-    let currentPage = 1;
-    let perPage = 10;
-
-    // Add pagination controls
-    function createPaginationControls(pagination) {
-        const paginationDiv = document.createElement('div');
-        paginationDiv.className = 'flex justify-center gap-4 mt-8';
-        
-        // Previous page button
-        if (pagination.prev_page) {
-            const prevButton = document.createElement('button');
-            prevButton.className = 'px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300';
-            prevButton.textContent = 'Previous';
-            prevButton.onclick = () => {
-                currentPage = pagination.prev_page;
-                fetchBooks();
-            };
-            paginationDiv.appendChild(prevButton);
-        }
-        
-        // Page info
-        const pageInfo = document.createElement('span');
-        pageInfo.className = 'px-4 py-2 text-gray-700';
-        pageInfo.textContent = `Page ${pagination.current_page} of ${pagination.total_pages}`;
-        paginationDiv.appendChild(pageInfo);
-        
-        // Next page button
-        if (pagination.next_page) {
-            const nextButton = document.createElement('button');
-            nextButton.className = 'px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300';
-            nextButton.textContent = 'Next';
-            nextButton.onclick = () => {
-                currentPage = pagination.next_page;
-                fetchBooks();
-            };
-            paginationDiv.appendChild(nextButton);
-        }
-        
-        return paginationDiv;
-    }
-
-   window.fetchBooks = function () {
-    let searchQuery = searchInput.value.trim();
-    let url = "http://localhost:8080/api/books";
-
-    // Add query parameters
-    const params = new URLSearchParams();
-    params.append('page', currentPage);
-    params.append('per_page', perPage);
-    
-    if (searchQuery) params.append('search', searchQuery);
-    if (currentKategori) params.append('kategori', currentKategori);
-    if (currentLevel) params.append('level', currentLevel);
-
-    // Add parameters to URL
-    url += `?${params.toString()}`;
-
-    console.log("Fetching books from URL:", url);
-
-    fetch(url, {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`, // Ensure this is the correct token format
-            "Content-Type": "application/json",
-            "Accept": "application/json" // Explicitly request JSON
-        },
-    })
-    .then(response => {
-        console.log("Response status:", response.status);
-        
-        // Log the full response for debugging
-        return response.json().then(data => {
-            if (!response.ok) {
-                console.error("Error response:", data);
-                throw new Error(data.message || 'Failed to fetch books');
+    <script>
+        const baseURL = "<?= base_url() ?>";
+        document.addEventListener("DOMContentLoaded", function() {
+            const apiBaseUrl = "<?= base_url('api/books') ?>";
+            const token = localStorage.getItem("token");
+            if (!token) {
+                window.location.href = "<?= base_url('login-user') ?>";
+                return;
             }
-            return data;
-        });
-    })
-    .then(data => {
-        console.log("Received book data:", data);
-        
-        // Rest of your existing rendering logic
-        bookContainer.innerHTML = "";
 
-        if (!data || !data.data.length) {
-            bookContainer.innerHTML = '<div class="text-center text-gray-500">No books found</div>';
-            return;
-        }
+            const bookContainer = document.getElementById("bookContainer");
+            const kategoriButtons = document.querySelectorAll(".kategori-filters .filter-btn");
+            const levelButtons = document.querySelectorAll(".level-filters .filter-btn");
+            const searchInput = document.getElementById("search");
 
-        data.data.forEach(book => {
-            const bookCard = `
+            let currentKategori = "";
+            let currentLevel = "";
+            let currentPage = 1;
+            let perPage = 10;
+
+            // Add pagination controls
+            function createPaginationControls(pagination) {
+                const paginationDiv = document.createElement('div');
+                paginationDiv.className = 'flex justify-center gap-4 mt-8';
+
+                // Previous page button
+                if (pagination.prev_page) {
+                    const prevButton = document.createElement('button');
+                    prevButton.className = 'px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300';
+                    prevButton.textContent = 'Previous';
+                    prevButton.onclick = () => {
+                        currentPage = pagination.prev_page;
+                        fetchBooks();
+                    };
+                    paginationDiv.appendChild(prevButton);
+                }
+
+                // Page info
+                const pageInfo = document.createElement('span');
+                pageInfo.className = 'px-4 py-2 text-gray-700';
+                pageInfo.textContent = `Page ${pagination.current_page} of ${pagination.total_pages}`;
+                paginationDiv.appendChild(pageInfo);
+
+                // Next page button
+                if (pagination.next_page) {
+                    const nextButton = document.createElement('button');
+                    nextButton.className = 'px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300';
+                    nextButton.textContent = 'Next';
+                    nextButton.onclick = () => {
+                        currentPage = pagination.next_page;
+                        fetchBooks();
+                    };
+                    paginationDiv.appendChild(nextButton);
+                }
+
+                return paginationDiv;
+            }
+
+            window.fetchBooks = function() {
+                let searchQuery = searchInput.value.trim();
+                let url = "http://localhost:8080/api/books";
+
+                // Add query parameters
+                const params = new URLSearchParams();
+                params.append('page', currentPage);
+                params.append('per_page', perPage);
+
+                if (searchQuery) params.append('search', searchQuery);
+                if (currentKategori) params.append('kategori', currentKategori);
+                if (currentLevel) params.append('level', currentLevel);
+
+                // Add parameters to URL
+                url += `?${params.toString()}`;
+
+                console.log("Fetching books from URL:", url);
+
+                fetch(url, {
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${token}`, // Ensure this is the correct token format
+                            "Content-Type": "application/json",
+                            "Accept": "application/json" // Explicitly request JSON
+                        },
+                    })
+                    .then(response => {
+                        console.log("Response status:", response.status);
+
+                        // Log the full response for debugging
+                        return response.json().then(data => {
+                            if (!response.ok) {
+                                console.error("Error response:", data);
+                                throw new Error(data.message || 'Failed to fetch books');
+                            }
+                            return data;
+                        });
+                    })
+                    .then(data => {
+                        console.log("Received book data:", data);
+
+                        // Rest of your existing rendering logic
+                        bookContainer.innerHTML = "";
+
+                        if (!data || !data.data.length) {
+                            bookContainer.innerHTML = '<div class="text-center text-gray-500">No books found</div>';
+                            return;
+                        }
+
+                        data.data.forEach(book => {
+                            const bookCard = `
                 <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col sm:flex-row gap-4 border border-gray-200">
                     <img src="${book.sampul_url || '/api/placeholder/120/160'}" alt="${book.judul}" 
                          class="w-32 h-40 object-cover rounded-md shadow-md">
                     <div class="flex-1">
                         <h3 class="font-bold text-lg mb-2">${book.judul}</h3>
                         <p class="text-sm text-gray-600 mb-1">
-                            ${book.pengarang ? book.pengarang : 'Unknown Author'}${book.penerbit ? `, ${book.penerbit}` : ''}${book.tahun && book.tahun !== '0000' ? `, ${book.tahun}` : ''}
+                            ${book.pengarang ? book.pengarang : 'Unknown Author'}${book.penerbit ? `. ${book.penerbit}` : ''}${book.tahun && book.tahun !== '0000' ? `. ${book.tahun}` : ''}
                         </p>
-                        <p class="text-sm text-gray-500 mb-2">${book.kategori || 'Uncategorized'}</p>
+                        <p class="text-sm text-gray-500 mb-2">Kategori: ${book.kategori || 'Uncategorized'}</p>
+                        <p class="text-sm text-gray-500 mb-2">Level: ${book.level || 'No level'}</p>
                         <p class="text-sm text-gray-600 mb-4">${book.sinopsis || "No synopsis available"}</p>
                         <p class="text-xs text-gray-400 mb-2">ISBN: ${book.isbn || 'N/A'}</p>
                         <div class="flex gap-2">
@@ -293,48 +301,49 @@ document.addEventListener("DOMContentLoaded", function () {
                     </div>
                 </div>
             `;
-            bookContainer.innerHTML += bookCard;
-        });
+                            bookContainer.innerHTML += bookCard;
+                        });
 
-        // Add pagination controls
-        if (data.pagination) {
-            bookContainer.appendChild(createPaginationControls(data.pagination));
-        }
-    })
-    .catch(error => {
-        console.error("Full error details:", error);
-        console.log("Token:", token);
-        bookContainer.innerHTML = `<div class="text-center text-red-500">Error loading books: ${error.message}</div>`;
-    });
-};
+                        // Add pagination controls
+                        if (data.pagination) {
+                            bookContainer.appendChild(createPaginationControls(data.pagination));
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Full error details:", error);
+                        console.log("Token:", token);
+                        bookContainer.innerHTML = `<div class="text-center text-red-500">Error loading books: ${error.message}</div>`;
+                    });
+            };
 
-    // Handle Kategori Filter
-    kategoriButtons.forEach(button => {
-        button.addEventListener("click", function () {
-            kategoriButtons.forEach(btn => btn.classList.remove("active"));
-            this.classList.add("active");
-            currentKategori = this.getAttribute("data-kategori");
-            currentPage = 1; // Reset to first page when filtering
+            // Handle Kategori Filter
+            kategoriButtons.forEach(button => {
+                button.addEventListener("click", function() {
+                    kategoriButtons.forEach(btn => btn.classList.remove("active"));
+                    this.classList.add("active");
+                    currentKategori = this.getAttribute("data-kategori");
+                    currentPage = 1; // Reset to first page when filtering
+                    fetchBooks();
+                });
+            });
+
+            // Handle Level Filter
+            levelButtons.forEach(button => {
+                button.addEventListener("click", function() {
+                    levelButtons.forEach(btn => btn.classList.remove("active"));
+                    this.classList.add("active");
+                    currentLevel = this.getAttribute("data-level");
+                    currentPage = 1; // Reset to first page when filtering
+                    fetchBooks();
+                });
+            });
+
             fetchBooks();
         });
-    });
-
-    // Handle Level Filter
-    levelButtons.forEach(button => {
-        button.addEventListener("click", function () {
-            levelButtons.forEach(btn => btn.classList.remove("active"));
-            this.classList.add("active");
-            currentLevel = this.getAttribute("data-level");
-            currentPage = 1; // Reset to first page when filtering
-            fetchBooks();
-        });
-    });
-
-    fetchBooks();
-});
-</script>
+    </script>
 
 </body>
+
 </html>
 
 <?= $this->endSection() ?>
