@@ -4,6 +4,8 @@ namespace App\Controllers;
 
 use CodeIgniter\RESTful\ResourceController;
 use App\Models\BookModel;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class BookController extends ResourceController
 {
@@ -201,5 +203,24 @@ class BookController extends ResourceController
 
         $this->bookModel->delete($id);
         return $this->respondDeleted(['message' => 'Book deleted successfully']);
+    }
+
+    public function printPDF()
+    {
+        $bookModel = new \App\Models\BookModel();
+        $books = $bookModel->findAll();
+
+        // Load view to string
+        $html = view('buku_pdf', ['books' => $books]);
+
+        // Dompdf setup
+        $options = new Options();
+        $options->set('isRemoteEnabled', true);
+
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+        $dompdf->stream("data_buku.pdf", ["Attachment" => false]);
     }
 }

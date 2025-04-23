@@ -9,7 +9,7 @@
         </div>
 
         <!-- Add Member Form -->
-        <div class="bg-white rounded-lg shadow-lg p-6 max-w-3xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full">
             <form id="anggotaForm" class="space-y-6">
                 <!-- Profile Photo Upload -->
                 <div class="flex flex-col items-center">
@@ -18,29 +18,29 @@
                     </div>
                     <input type="file" id="profilePicture" accept="image/*" class="hidden">
                     <button type="button" id="uploadPictureBtn" class="bg-gradient-to-b from-[#FA7C54] to-[#EC2C5A] text-white px-4 py-2 rounded-lg shadow-md mt-2">
-    Pilih Foto Profil
-</button>
+                        Pilih Foto Profil
+                    </button>
                 </div>
 
                 <!-- Form Fields -->
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                        <input id="nama_lengkap" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                        <input id="nama_lengkap" type="text" class="w-full p-2 rounded-md border shadow-sm">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Username</label>
-                        <input id="username" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <input id="username" type="text" class="w-full p-2 rounded-md border shadow-sm">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Password</label>
-                        <input id="password" type="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <input id="password" type="password" class="w-full p-2 rounded-md border shadow-sm">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Kelamin</label>
                         <div class="mt-2 space-y-2">
                             <div class="flex items-center">
                                 <input type="radio" name="gender" value="P" class="h-4 w-4 text-red-600 border-gray-300">
@@ -54,8 +54,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Level</label>
-                        <select id="level" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Level</label>
+                        <select id="level" class="w-full p-2 rounded-md border shadow-sm">
                             <option value="Kelas 1">Kelas 1</option>
                             <option value="Kelas 2">Kelas 2</option>
                             <option value="Kelas 3">Kelas 3</option>
@@ -68,14 +68,19 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Alamat</label>
-                        <textarea id="alamat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" rows="3"></textarea>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
+                        <textarea id="alamat" class="w-full p-2 rounded-md border shadow-sm" rows="3"></textarea>
                     </div>
                 </div>
 
                 <!-- Submit Button -->
-                <div class="flex justify-end">
-                    <button type="submit" id="submitBtn" class="bg-gradient-to-b from-[#FA7C54] to-[#EC2C5A] text-white px-6 py-2 rounded-lg hover:opacity-90 transition-opacity">
+                <div class="pt-4 flex flex-col sm:flex-row sm:justify-end sm:space-x-4">
+                    <a href="<?= base_url('anggota') ?>" class="flex-1 text-center bg-gradient-to-r from-[#FA7C54] to-[#EC2C5A] rounded-lg p-[2px] hover:opacity-90 transition">
+                        <div class="bg-white rounded-md text-sm font-medium text-[#EC2C5A] py-1.5">
+                            Batal
+                        </div>
+                    </a>
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-[#FA7C54] to-[#EC2C5A] text-white text-sm font-medium py-1.5 rounded-lg hover:opacity-90 transition">
                         Simpan
                     </button>
                 </div>
@@ -85,97 +90,99 @@
 </body>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    console.log("🔹 Script loaded: Ready to handle user creation");
+    document.addEventListener("DOMContentLoaded", function() {
+        console.log("🔹 Script loaded: Ready to handle user creation");
 
-    const baseURL = "<?= rtrim(base_url(), '/') ?>/"; // ✅ Ensure base URL is formatted correctly
-    const token = localStorage.getItem("token");
-    let newMemberId = null;
+        const baseURL = "<?= rtrim(base_url(), '/') ?>/"; // ✅ Ensure base URL is formatted correctly
+        const token = localStorage.getItem("token");
+        let newMemberId = null;
 
-    if (!token) {
-        alert("Unauthorized! Please log in.");
-        window.location.href = baseURL + "login-admin";
-        return;
-    }
+        if (!token) {
+            alert("Unauthorized! Please log in.");
+            window.location.href = baseURL + "login-admin";
+            return;
+        }
 
-    document.getElementById("uploadPictureBtn").addEventListener("click", () => {
-        document.getElementById("profilePicture").click();
-    });
+        document.getElementById("uploadPictureBtn").addEventListener("click", () => {
+            document.getElementById("profilePicture").click();
+        });
 
-    document.getElementById("profilePicture").addEventListener("change", function (event) {
-        const file = event.target.files[0];
-        if (!file) return;
+        document.getElementById("profilePicture").addEventListener("change", function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            document.getElementById("profilePicturePreview").src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    });
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById("profilePicturePreview").src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
 
-    document.getElementById("anggotaForm").addEventListener("submit", async function (event) {
-        event.preventDefault();
-        console.log("📡 Submitting user data...");
+        document.getElementById("anggotaForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            console.log("📡 Submitting user data...");
 
-        const anggotaData = {
-            nama_anggota: document.getElementById("nama_lengkap").value,
-            username: document.getElementById("username").value,
-            password: document.getElementById("password").value,
-            jk_anggota: document.querySelector('input[name="gender"]:checked')?.value,
-            level_anggota: document.getElementById("level").value,
-            alamat_anggota: document.getElementById("alamat").value
-        };
+            const anggotaData = {
+                nama_anggota: document.getElementById("nama_lengkap").value,
+                username: document.getElementById("username").value,
+                password: document.getElementById("password").value,
+                jk_anggota: document.querySelector('input[name="gender"]:checked')?.value,
+                level_anggota: document.getElementById("level").value,
+                alamat_anggota: document.getElementById("alamat").value
+            };
 
-        try {
-            console.log("📡 Sending request to create user:", anggotaData);
-            const createResponse = await fetch(`${baseURL}api/members`, {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(anggotaData)
-            });
-
-            const createData = await createResponse.json();
-
-            if (!createResponse.ok) {
-                alert(`❌ Gagal menambahkan anggota: ${createData.message}`);
-                return;
-            }
-
-            newMemberId = createData.data.id_anggota;
-
-            // Upload Profile Picture (if selected)
-            const fileInput = document.getElementById("profilePicture");
-            if (fileInput.files.length > 0) {
-                console.log("📸 Uploading profile picture...");
-                const file = fileInput.files[0];
-                const formData = new FormData();
-                formData.append("profilePicture", file);
-
-                const uploadResponse = await fetch(`${baseURL}api/members/${newMemberId}/upload-profile-picture`, {
+            try {
+                console.log("📡 Sending request to create user:", anggotaData);
+                const createResponse = await fetch(`${baseURL}api/members`, {
                     method: "POST",
-                    headers: { "Authorization": `Bearer ${token}` },
-                    body: formData
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(anggotaData)
                 });
 
-                const uploadData = await uploadResponse.json();
+                const createData = await createResponse.json();
 
-                if (!uploadResponse.ok) throw new Error(uploadData.message || "Gagal mengunggah foto.");
+                if (!createResponse.ok) {
+                    alert(`❌ Gagal menambahkan anggota: ${createData.message}`);
+                    return;
+                }
 
-                console.log("🖼 Profile picture uploaded successfully:", uploadData.foto_url);
+                newMemberId = createData.data.id_anggota;
+
+                // Upload Profile Picture (if selected)
+                const fileInput = document.getElementById("profilePicture");
+                if (fileInput.files.length > 0) {
+                    console.log("📸 Uploading profile picture...");
+                    const file = fileInput.files[0];
+                    const formData = new FormData();
+                    formData.append("profilePicture", file);
+
+                    const uploadResponse = await fetch(`${baseURL}api/members/${newMemberId}/upload-profile-picture`, {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        },
+                        body: formData
+                    });
+
+                    const uploadData = await uploadResponse.json();
+
+                    if (!uploadResponse.ok) throw new Error(uploadData.message || "Gagal mengunggah foto.");
+
+                    console.log("🖼 Profile picture uploaded successfully:", uploadData.foto_url);
+                }
+
+                alert("✅ Anggota berhasil ditambahkan!");
+                window.location.href = baseURL + "anggota";
+
+            } catch (error) {
+                console.error("🚨 Error:", error);
+                alert(`❌ Terjadi kesalahan: ${error.message}`);
             }
-
-            alert("✅ Anggota berhasil ditambahkan!");
-            window.location.href = baseURL + "anggota";
-
-        } catch (error) {
-            console.error("🚨 Error:", error);
-            alert(`❌ Terjadi kesalahan: ${error.message}`);
-        }
+        });
     });
-});
 </script>
 
 <?= $this->endSection() ?>

@@ -13,7 +13,6 @@
 
   <div class="relative z-10 w-full max-w-3xl bg-white rounded-xl shadow-lg p-8 sm:p-12 flex flex-col items-center">
     <h1 class="font-bold text-2xl sm:text-3xl mb-6 text-orange-600">Masuk Admin</h1>
-    
     <div class="w-full">
       <form id="adminLoginForm" class="space-y-4">
         <div>
@@ -46,26 +45,29 @@
       };
 
       fetch("<?= base_url('api/login') ?>", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody)
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.token) {
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("user", JSON.stringify(data.user));
-          alert("Login berhasil!");
-          window.location.href = "<?= base_url('/beranda') ?>";
-        } else {
-          alert("Login gagal: " + (data.message || "Email atau password salah!"));
-        }
-      })
-      .catch(error => {
-        alert("Login gagal, silakan coba lagi.");
-        console.error("Login error:", error);
-      });
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(requestBody)
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.token) {
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("user", JSON.stringify(data.user));
+            alert("Login berhasil!");
+            window.location.href = "<?= base_url('/beranda') ?>";
+          } else {
+            alert("Login gagal: " + (data.message || "Email atau password salah!"));
+          }
+        })
+        .catch(error => {
+          alert("Login gagal, silakan coba lagi.");
+          console.error("Login error:", error);
+        });
     });
   </script>
 </body>
+
 </html>

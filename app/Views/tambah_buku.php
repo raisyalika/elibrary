@@ -5,20 +5,17 @@
     <div class="flex-1 p-8">
         <div class="flex justify-between items-center mb-8 p-4">
             <h1 class="text-2xl font-bold bg-gradient-to-b from-[#EC2C5A] to-[#FA7C54] bg-clip-text text-transparent">Tambah Buku</h1>
-            <a href="javascript:window.history.back();" class="font-bold bg-gradient-to-b from-[#FA7C54] to-[#EC2C5A] text-white px-4 py-2 rounded-lg items-center">
-                ← Batal
-            </a>
         </div>
 
         <div class="bg-white rounded-lg shadow-md p-6 max-w-4xl mx-auto">
             <form id="bookForm" class="space-y-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Sampul Buku*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sampul Buku</label>
                     <input type="file" id="sampul" class="w-full p-2 border rounded-md" accept="image/*">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Judul*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Judul</label>
                     <input required type="text" id="judul" class="w-full p-2 border rounded-md">
                 </div>
 
@@ -28,27 +25,27 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pengarang*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pengarang</label>
                     <input required type="text" id="pengarang" class="w-full p-2 border rounded-md">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Penerbit*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Penerbit</label>
                     <input required type="text" id="penerbit" class="w-full p-2 border rounded-md">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Terbit*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Terbit</label>
                     <input required type="number" id="tahun" class="w-full p-2 border rounded-md">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Pengadaan*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Pengadaan</label>
                     <input required type="date" id="tanggal_pengadaan" class="w-full p-2 border rounded-md">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Kategori*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
                     <select required id="kategori" class="w-full p-2 border rounded-md">
                         <option value="non_fiksi">Non Fiksi</option>
                         <option value="dongeng">Dongeng</option>
@@ -61,7 +58,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Level*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Level</label>
                     <select required id="level" class="w-full p-2 border rounded-md">
                         <option value="Kelas 1">Kelas 1</option>
                         <option value="Kelas 2">Kelas 2</option>
@@ -71,7 +68,6 @@
                         <option value="Kelas 5">Kelas 5</option>
                         <option value="Guru">Guru</option>
                         <option value="Lainnya">Lainnya</option>
-                    
                     </select>
                 </div>
 
@@ -81,7 +77,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Format*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Format</label>
                     <label><input type="checkbox" id="formatEbook" value="E-Book"> E-Book</label>
                     <label><input type="checkbox" id="formatFisik" value="Buku Fisik"> Buku Fisik</label>
                 </div>
@@ -91,8 +87,16 @@
                     <input type="file" id="ebook" class="w-full p-2 border rounded-md" accept="application/pdf">
                 </div>
 
-                <div class="pt-4">
-                    <button type="submit" class="w-full py-2 px-4 bg-red-500 text-white rounded-md hover:bg-red-600">Simpan</button>
+                <div class="pt-4 flex flex-col sm:flex-row sm:justify-end sm:space-x-4">
+                    <!-- Tombol Batal -->
+                    <a href="javascript:window.history.back();" class="flex-1 text-center border border-gray-300 text-gray-700 text-sm font-medium rounded-lg py-1.5 hover:bg-gray-50 hover:opacity-90 transition">
+                        Batal
+                    </a>
+
+                    <!-- Tombol Simpan -->
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-[#FA7C54] to-[#EC2C5A] text-white text-sm font-medium py-1.5 rounded-lg hover:opacity-90 transition">
+                        Simpan
+                    </button>
                 </div>
             </form>
         </div>
@@ -102,7 +106,7 @@
     <script>
         const baseUrl = "<?= base_url() ?>";
 
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function() {
             console.log("✅ DOMContentLoaded fired");
 
             // USERNAME ELEMENT CHECK
@@ -129,7 +133,7 @@
             }
 
             // SUBMIT LISTENER
-            form.addEventListener("submit", async function (event) {
+            form.addEventListener("submit", async function(event) {
                 event.preventDefault();
                 console.log("🚀 Form submission triggered!");
 
@@ -196,7 +200,9 @@
 
                         const coverResponse = await fetch(`${baseUrl}api/books/${bookId}/upload-cover`, {
                             method: "POST",
-                            headers: { "Authorization": `Bearer ${token}` },
+                            headers: {
+                                "Authorization": `Bearer ${token}`
+                            },
                             body: coverFormData
                         });
 
@@ -218,7 +224,9 @@
 
                         const pdfResponse = await fetch(`${baseUrl}api/books/${bookId}/upload-pdf`, {
                             method: "POST",
-                            headers: { "Authorization": `Bearer ${token}` },
+                            headers: {
+                                "Authorization": `Bearer ${token}`
+                            },
                             body: pdfFormData
                         });
 

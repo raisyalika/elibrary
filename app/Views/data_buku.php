@@ -7,10 +7,19 @@
         <div class="flex justify-between items-center mb-8 p-4 rounded-lg">
             <h1 class="text-2xl font-bold bg-gradient-to-b from-[#EC2C5A] to-[#FA7C54] bg-clip-text text-transparent">Buku</h1>
             <div class="flex items-center space-x-4">
+                <a href="<?= base_url('buku/printPDF') . '?' . http_build_query([
+                                'kategori' => $_GET['kategori'] ?? '',
+                                'search' => $_GET['search'] ?? ''
+                            ]) ?>" class="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg flex items-center hover:bg-gray-200">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    Cetak PDF
+                </a>
                 <span id="userName" class="text-gray-600"></span>
                 <a href="<?= base_url('buku/tambah_buku') ?>" class="bg-gradient-to-b from-[#FA7C54] to-[#EC2C5A] text-white px-4 py-2 rounded-lg flex items-center">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
                     Tambah Buku
                 </a>
@@ -58,107 +67,108 @@
 
         <!-- Pagination -->
         <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-           
+
             <div class="flex space-x-2">
-                <button class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600" id="prevBtn">Prev</button>
-                <button class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600" id="nextBtn">Next</button>
+                <button class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600" id="prevBtn">
+                    < </button>
+                        <button class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600" id="nextBtn">></button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    let token = localStorage.getItem("token");
+    document.addEventListener("DOMContentLoaded", function() {
+        let token = localStorage.getItem("token");
 
-    if (token) fetchBooks(1);
+        if (token) fetchBooks(1);
 
-    document.getElementById("searchInput").addEventListener("input", () => fetchBooks(1));
-    document.getElementById("categoryFilter").addEventListener("change", () => fetchBooks(1));
-    document.getElementById("prevBtn").addEventListener("click", () => changePage(-1));
-    document.getElementById("nextBtn").addEventListener("click", () => changePage(1));
-});
+        document.getElementById("searchInput").addEventListener("input", () => fetchBooks(1));
+        document.getElementById("categoryFilter").addEventListener("change", () => fetchBooks(1));
+        document.getElementById("prevBtn").addEventListener("click", () => changePage(-1));
+        document.getElementById("nextBtn").addEventListener("click", () => changePage(1));
+    });
 
-let currentPage = 1;
-let totalEntries = 0;
-let perPage = 10;
+    let currentPage = 1;
+    let totalEntries = 0;
+    let perPage = 10;
 
-async function fetchBooks(page = 1) {
-    const apiBaseUrl = "http://localhost:8080/api/books";
-    const searchQuery = document.getElementById("searchInput").value.trim();
-    const selectedCategory = document.getElementById("categoryFilter").value;
-    
-    let queryParams = [`page=${page}`, `per_page=${perPage}`];
-    if (searchQuery) queryParams.push(`search=${encodeURIComponent(searchQuery)}`);
-    if (selectedCategory) queryParams.push(`kategori=${encodeURIComponent(selectedCategory)}`);
+    async function fetchBooks(page = 1) {
+        const apiBaseUrl = "http://localhost:8080/api/books";
+        const searchQuery = document.getElementById("searchInput").value.trim();
+        const selectedCategory = document.getElementById("categoryFilter").value;
 
-    try {
-        const response = await fetch(`${apiBaseUrl}?${queryParams.join("&")}`, {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${localStorage.getItem("token")}`,
-                "Content-Type": "application/json"
-            }
-        });
+        let queryParams = [`page=${page}`, `per_page=${perPage}`];
+        if (searchQuery) queryParams.push(`search=${encodeURIComponent(searchQuery)}`);
+        if (selectedCategory) queryParams.push(`kategori=${encodeURIComponent(selectedCategory)}`);
 
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        try {
+            const response = await fetch(`${apiBaseUrl}?${queryParams.join("&")}`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
+                    "Content-Type": "application/json"
+                }
+            });
 
-        const result = await response.json();
-        totalEntries = result.pagination.total_books;
-        currentPage = result.pagination.current_page;
-        renderTable(result.data);
-        updatePagination();
-    } catch (error) {
-        console.error("Error fetching books:", error);
-    }
-}
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-function updatePagination() {
-    const prevBtn = document.getElementById("prevBtn");
-    const nextBtn = document.getElementById("nextBtn");
-    
-    // Calculate total pages
-    const totalPages = Math.ceil(totalEntries / perPage);
-    
-    // Disable/enable prev button
-    prevBtn.disabled = currentPage <= 1;
-    prevBtn.classList.toggle("opacity-50", currentPage <= 1);
-    
-    // Disable/enable next button
-    nextBtn.disabled = currentPage >= totalPages;
-    nextBtn.classList.toggle("opacity-50", currentPage >= totalPages);
-    
-    // Add page indicator
-    const paginationInfo = document.createElement("div");
-    paginationInfo.className = "text-sm text-gray-700";
-    paginationInfo.innerHTML = `Page ${currentPage} of ${totalPages} (${totalEntries} total entries)`;
-    
-    // Find pagination container and update it
-    const paginationContainer = document.querySelector(".bg-white.px-4.py-3.flex");
-    
-    // Remove existing page info if any
-    const existingInfo = paginationContainer.querySelector(".text-sm.text-gray-700");
-    if (existingInfo) {
-        existingInfo.remove();
-    }
-    
-    // Insert between flex container start and buttons
-    paginationContainer.insertBefore(paginationInfo, document.getElementById("prevBtn").parentNode);
-}
-
-function renderTable(data) {
-    const tableBody = document.getElementById("bookTableBody");
-    tableBody.innerHTML = "";
-
-    if (data.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan="10" class="text-center py-4">📭 Tidak ada hasil ditemukan.</td></tr>`;
-        return;
+            const result = await response.json();
+            totalEntries = result.pagination.total_books;
+            currentPage = result.pagination.current_page;
+            renderTable(result.data);
+            updatePagination();
+        } catch (error) {
+            console.error("Error fetching books:", error);
+        }
     }
 
-    data.forEach((book, index) => {
-        const row = document.createElement("tr");
-        row.className = "hover:bg-gray-50";
-        row.innerHTML = `
+    function updatePagination() {
+        const prevBtn = document.getElementById("prevBtn");
+        const nextBtn = document.getElementById("nextBtn");
+
+        // Calculate total pages
+        const totalPages = Math.ceil(totalEntries / perPage);
+
+        // Disable/enable prev button
+        prevBtn.disabled = currentPage <= 1;
+        prevBtn.classList.toggle("opacity-50", currentPage <= 1);
+
+        // Disable/enable next button
+        nextBtn.disabled = currentPage >= totalPages;
+        nextBtn.classList.toggle("opacity-50", currentPage >= totalPages);
+
+        // Add page indicator
+        const paginationInfo = document.createElement("div");
+        paginationInfo.className = "text-sm text-gray-700";
+        paginationInfo.innerHTML = `Page ${currentPage} of ${totalPages} (${totalEntries} total entries)`;
+
+        // Find pagination container and update it
+        const paginationContainer = document.querySelector(".bg-white.px-4.py-3.flex");
+
+        // Remove existing page info if any
+        const existingInfo = paginationContainer.querySelector(".text-sm.text-gray-700");
+        if (existingInfo) {
+            existingInfo.remove();
+        }
+
+        // Insert between flex container start and buttons
+        paginationContainer.insertBefore(paginationInfo, document.getElementById("prevBtn").parentNode);
+    }
+
+    function renderTable(data) {
+        const tableBody = document.getElementById("bookTableBody");
+        tableBody.innerHTML = "";
+
+        if (data.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="10" class="text-center py-4">📭 Tidak ada hasil ditemukan.</td></tr>`;
+            return;
+        }
+
+        data.forEach((book, index) => {
+            const row = document.createElement("tr");
+            row.className = "hover:bg-gray-50";
+            row.innerHTML = `
             <td class="px-6 py-4">${(currentPage - 1) * perPage + index + 1}</td>
             <td class="px-6 py-4">${book.id_buku}</td>
             <td class="px-6 py-4"><img src="${book.sampul_url || '<?= base_url('assets/placeholder.jpg') ?>'}" alt="Cover" class="w-12 h-12 rounded"></td>
@@ -173,36 +183,36 @@ function renderTable(data) {
                 <button onclick="deleteBook(${book.id_buku})" class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs">Hapus</button>
             </td>
         `;
-        tableBody.appendChild(row);
-    });
-}
-
-async function deleteBook(bookId) {
-    const apiBaseUrl = "http://localhost:8080/api/books";
-    const token = localStorage.getItem("token");
-
-    if (!confirm("Apakah Anda yakin ingin menghapus buku ini?")) {
-        return;
-    }
-
-    try {
-        const response = await fetch(`${apiBaseUrl}/${bookId}`, {
-            method: "DELETE",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            }
+            tableBody.appendChild(row);
         });
-
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-        alert("✅ Buku berhasil dihapus!");
-        fetchBooks(currentPage);
-    } catch (error) {
-        console.error("Error deleting book:", error);
-        alert("❌ Terjadi kesalahan saat menghapus buku.");
     }
-}
+
+    async function deleteBook(bookId) {
+        const apiBaseUrl = "http://localhost:8080/api/books";
+        const token = localStorage.getItem("token");
+
+        if (!confirm("Apakah Anda yakin ingin menghapus buku ini?")) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${apiBaseUrl}/${bookId}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+            alert("✅ Buku berhasil dihapus!");
+            fetchBooks(currentPage);
+        } catch (error) {
+            console.error("Error deleting book:", error);
+            alert("❌ Terjadi kesalahan saat menghapus buku.");
+        }
+    }
 </script>
 
 <?= $this->endSection() ?>

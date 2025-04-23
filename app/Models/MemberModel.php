@@ -17,7 +17,6 @@ class MemberModel extends Model
         'alamat_anggota',
         'foto_url'
     ];
-    
     protected $beforeInsert = ['hashPassword'];
     protected $beforeUpdate = ['hashPassword'];
 
@@ -25,19 +24,19 @@ class MemberModel extends Model
         'username' => 'required|is_unique[anggota.username]',
         'password' => 'required|min_length[6]',
     ];
-    
-    
+
+
     protected function hashPassword(array $data)
     {
         if (!isset($data['data']['password'])) {
             return $data;
         }
-    
+
         // Check if the password is already hashed (avoid double hashing)
-        if (!password_get_info($data['data']['password'])['algo']) { 
+        if (!password_get_info($data['data']['password'])['algo']) {
             $data['data']['password'] = password_hash($data['data']['password'], PASSWORD_BCRYPT);
         }
-    
+
         return $data;
     }
     

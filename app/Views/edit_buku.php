@@ -16,7 +16,7 @@
         <div class="bg-white rounded-lg shadow-md p-6 max-w-4xl mx-auto">
             <form class="space-y-6" id="bookForm" enctype="multipart/form-data">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Sampul Buku*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Sampul Buku</label>
                     <div class="mb-2">
                         <img id="coverPreview" src="/api/placeholder/120/120" alt="Cover Preview" class="w-32 h-32 object-cover rounded-md">
                     </div>
@@ -24,7 +24,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Judul*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Judul</label>
                     <input type="text" id="judul" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="Masukkan Judul">
                 </div>
 
@@ -34,28 +34,28 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pengarang*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pengarang</label>
                     <input type="text" id="pengarang" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="Masukkan Nama Pengarang">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Penerbit*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Penerbit</label>
                     <input type="text" id="penerbit" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="Masukkan Nama Penerbit">
                 </div>
 
                 <!-- Tahun Terbit now as a number input -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Terbit*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tahun Terbit</label>
                     <input type="number" id="tahun" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="Masukkan Tahun" min="1900" max="2099">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Pengadaan*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Pengadaan</label>
                     <input type="date" id="tanggal_pengadaan" class="w-full p-2 border rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Kategori*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
                     <div class="space-y-2">
                         <label class="inline-flex items-center">
                             <input type="radio" name="category" value="non fiksi" class="text-red-500 focus:ring-red-500">
@@ -89,7 +89,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Level*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Level</label>
                     <select id="level" class="w-full p-2 border rounded-md">
                         <option value="Kelas 1">Kelas 1</option>
                         <option value="Kelas 2">Kelas 2</option>
@@ -108,7 +108,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Format*</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Format</label>
                     <div class="space-y-2">
                         <label class="inline-flex items-center">
                             <input type="checkbox" value="E-Book" class="text-red-500 focus:ring-red-500">
@@ -129,12 +129,13 @@
                 </div>
 
                 <div class="pt-4 flex flex-col sm:flex-row sm:justify-end sm:space-x-4">
-                    <button id="simpanButton" type="submit" class="w-full sm:w-auto py-2 px-4 bg-gradient-to-b from-[#FA7C54] to-[#EC2C5A] text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
-                        Simpan
-                    </button>
-                    <a href="<?= base_url('buku') ?>" class="w-full sm:w-auto inline-block text-center mt-2 sm:mt-0 px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                    <a href="<?= base_url('buku') ?>" class="flex-1 text-center border border-gray-300 text-gray-700 text-sm font-medium rounded-lg py-1.5 hover:bg-gray-50 hover:opacity-90 transition">
                         Batal
                     </a>
+                    <button id="simpanButton" type="submit" class="flex-1 bg-gradient-to-r from-[#FA7C54] to-[#EC2C5A] text-white text-sm py-1.5 rounded-lg hover:opacity-90 transition">
+                        Simpan
+                    </button>
+
                 </div>
             </form>
         </div>
@@ -142,9 +143,9 @@
 </body>
 
 <script>
-    const baseURL = "<?= base_url() ?>"; 
-    document.addEventListener("DOMContentLoaded", function () {
-        let userData = localStorage.getItem("user"); 
+    const baseURL = "<?= base_url() ?>";
+    document.addEventListener("DOMContentLoaded", function() {
+        let userData = localStorage.getItem("user");
         let token = localStorage.getItem("token");
         const urlParams = new URLSearchParams(window.location.search);
         const bookId = urlParams.get("id");
@@ -160,7 +161,7 @@
             console.warn("Token atau Book ID tidak ditemukan.");
         }
 
-        document.getElementById("bookForm").addEventListener("submit", function (event) {
+        document.getElementById("bookForm").addEventListener("submit", function(event) {
             updateBook(event, bookId, token);
         });
     });
@@ -244,9 +245,9 @@
             // Handle file uploads if files are selected
             const coverFile = document.getElementById('sampul').files[0];
             const ebookFile = document.getElementById('ebook').files[0];
-            
+
             const formData = new FormData();
-            
+
             // Add regular form data
             formData.append('judul', document.getElementById("judul").value.trim());
             formData.append('isbn', document.getElementById("isbn").value.trim());
@@ -257,7 +258,6 @@
             formData.append('kategori', document.querySelector("input[name='category']:checked")?.value || "");
             formData.append('level', document.getElementById("level").value);
             formData.append('sinopsis', document.getElementById("sinopsis").value.trim());
-            
             // Add selected formats as a JSON string
             const selectedFormats = Array.from(document.querySelectorAll("input[type='checkbox']:checked")).map(cb => cb.value);
             formData.append('format', JSON.stringify(selectedFormats));
@@ -281,7 +281,6 @@
             if (coverFile) {
                 const coverFormData = new FormData();
                 coverFormData.append('cover', coverFile);
-                
                 const coverResponse = await fetch(`${baseURL}api/books/${bookId}/upload-cover`, {
                     method: 'POST',
                     headers: {
@@ -299,7 +298,6 @@
             if (ebookFile) {
                 const pdfFormData = new FormData();
                 pdfFormData.append('pdf', ebookFile);
-                
                 const pdfResponse = await fetch(`${baseURL}api/books/${bookId}/upload-pdf`, {
                     method: 'POST',
                     headers: {
