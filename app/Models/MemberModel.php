@@ -17,7 +17,6 @@ class MemberModel extends Model
         'alamat_anggota',
         'foto_url'
     ];
-
     protected $beforeInsert = ['hashPassword'];
     protected $beforeUpdate = ['hashPassword'];
 

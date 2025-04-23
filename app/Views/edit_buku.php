@@ -258,7 +258,6 @@
             formData.append('kategori', document.querySelector("input[name='category']:checked")?.value || "");
             formData.append('level', document.getElementById("level").value);
             formData.append('sinopsis', document.getElementById("sinopsis").value.trim());
-
             // Add selected formats as a JSON string
             const selectedFormats = Array.from(document.querySelectorAll("input[type='checkbox']:checked")).map(cb => cb.value);
             formData.append('format', JSON.stringify(selectedFormats));
@@ -282,7 +281,6 @@
             if (coverFile) {
                 const coverFormData = new FormData();
                 coverFormData.append('cover', coverFile);
-
                 const coverResponse = await fetch(`${baseURL}api/books/${bookId}/upload-cover`, {
                     method: 'POST',
                     headers: {
@@ -300,7 +298,6 @@
             if (ebookFile) {
                 const pdfFormData = new FormData();
                 pdfFormData.append('pdf', ebookFile);
-
                 const pdfResponse = await fetch(`${baseURL}api/books/${bookId}/upload-pdf`, {
                     method: 'POST',
                     headers: {

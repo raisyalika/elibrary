@@ -15,7 +15,6 @@
 
   <div class="relative z-10 w-full max-w-3xl bg-white rounded-xl shadow-lg p-8 sm:p-12 flex flex-col items-center">
     <h1 class="font-bold text-2xl sm:text-3xl mb-6 text-orange-600">Masuk Admin</h1>
-
     <div class="w-full">
       <form id="adminLoginForm" class="space-y-4">
         <div>

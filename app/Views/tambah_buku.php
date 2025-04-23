@@ -68,7 +68,6 @@
                         <option value="Kelas 5">Kelas 5</option>
                         <option value="Guru">Guru</option>
                         <option value="Lainnya">Lainnya</option>
-
                     </select>
                 </div>
 
